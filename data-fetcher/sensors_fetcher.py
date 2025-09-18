@@ -4,7 +4,7 @@ import requests
 import csv
 
 # Set up API
-load_dotenv()
+load_dotenv("../.env")
 API_KEY = os.getenv('API_KEY')
 BASE_URL = "https://api.openaq.org/v3/"
 DATA_ROOT = "../data/"
