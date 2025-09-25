@@ -5,11 +5,11 @@ import csv
 
 # Set up API
 load_dotenv("../.env")
-API_KEY = os.getenv('API_KEY')
+OPENAQ_API_KEY = os.getenv('OPENAQ_API_KEY')
 BASE_URL = "https://api.openaq.org/v3/"
 DATA_ROOT = "../data/"
 headers = {
-    "X-API-Key": API_KEY
+    "X-API-Key": OPENAQ_API_KEY
 }
 
 # Populate sensors.csv
