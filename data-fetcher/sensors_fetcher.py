@@ -29,6 +29,8 @@ with open(DATA_ROOT + "sensors.csv", "w", newline="", encoding="utf-8") as f:
         country_name = location["country"]["name"]
         latitude = location["coordinates"]["latitude"]
         longitude = location["coordinates"]["longitude"]
+        if not location["datetimeFirst"] or not location["datetimeLast"]:
+            continue
         first_reading = location["datetimeFirst"]["utc"]
         last_reading = location["datetimeLast"]["utc"]
 

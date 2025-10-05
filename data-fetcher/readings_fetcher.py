@@ -130,6 +130,10 @@ for _, row in sensors_df.iterrows():
 
 
 df_final = pd.DataFrame(all_data)
-df_final.to_csv(OUTPUT_FILE, index=False)
+# Append if a file exists, otherwise create with a header
+if os.path.exists(OUTPUT_FILE):
+    df_final.to_csv(OUTPUT_FILE, mode="a", header=False, index=False)
+else:
+    df_final.to_csv(OUTPUT_FILE, index=False)
 print(f"Saved {len(df_final)} rows to {OUTPUT_FILE}")
 
