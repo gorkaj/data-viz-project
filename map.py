@@ -7,9 +7,10 @@ import matplotlib.colors as mcolors
 sensors = pd.read_csv("./data/sensors.csv")
 readings = pd.read_csv("./data/readings.csv")
 
+pollutant_types = ["co", "no", "no2", "pm10", "o3", "pm1", "pm25", "relativehumidity", "temperature", "um003"]
 pollutant_selextbox = st.selectbox(
     "Which polluant would you like to visualize?",
-    ("co", "no", "no2", "pm10", "o3", "pm1", "pm25", "relativehumidity", "temperature", "um003")
+    pollutant_types
 )
 
 # Filtering for a pollutant type
