@@ -58,7 +58,7 @@ tab1, tab2 = st.tabs(["Filtered", "Unfiltered"])
 with tab1:
     st.write(f"Filtered values: {readings_by_sensor.shape[0] - readings_by_sensor_filtered.shape[0]}")
     corr = readings_by_sensor_filtered[[weather_param, "reading_value"]].corr()
-    st.write(f"Correlation: {round(corr[weather_param]["reading_value"], 2)}")
+    st.write(f"Correlation: {round(corr[weather_param]['reading_value'], 2)}")
     fig1 = px.scatter(
         readings_by_sensor_filtered,
         x = weather_param,
