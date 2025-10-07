@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import requests
 import csv
+from datetime import datetime
 
 # Set up API
 load_dotenv("../.env")
@@ -13,19 +14,24 @@ headers = {
 }
 
 # Populate sensors.csv
-lat, long = 56.175226574052786, 10.17011443955166
+lat, long = 56.175226574052786, 10.17011443955166  # Aarhus, use 25 km
+lat, long = 12.968905302543678, 77.57254360290341  # Bengaluru, use 5 km
 
+
+valid_pollutants = {"pm10", "pm25", "o3", "no2", "co", "so2"}
 response = requests.get(
     BASE_URL + "locations",
-    params={"coordinates": f"{lat},{long}", "radius": 25000},
+    params={"coordinates": f"{lat},{long}", "radius": 5000},
     headers=headers)
 
-with open(DATA_ROOT + "sensors.csv", "w", newline="", encoding="utf-8") as f:
+with open(DATA_ROOT + "sensors.csv", "a", newline="", encoding="utf-8") as f:
     rows = 0
     writer = csv.writer(f)
-    writer.writerow(["sensor_id", "country", "latitude", "longitude", "pollutant_type", "first_reading", "last_reading"])
+    if not os.path.isfile(DATA_ROOT + "sensors.csv"):
+        writer.writerow(
+            ["sensor_id", "country", "latitude", "longitude", "pollutant_type", "first_reading", "last_reading"])
 
-    for location in response.json()["results"]:
+    for location in response.json().get("results", []):
         country_name = location["country"]["name"]
         latitude = location["coordinates"]["latitude"]
         longitude = location["coordinates"]["longitude"]
@@ -34,11 +40,17 @@ with open(DATA_ROOT + "sensors.csv", "w", newline="", encoding="utf-8") as f:
         first_reading = location["datetimeFirst"]["utc"]
         last_reading = location["datetimeLast"]["utc"]
 
-        for sensor in location["sensors"]:
+        if datetime.fromisoformat(last_reading.replace("Z", "+00:00")).year < 2025:
+            continue
+
+        for sensor in location.get("sensors", []):
+            pollutant_type = sensor["parameter"]["name"].lower()
+
+            if pollutant_type not in valid_pollutants:
+                continue
 
             rows += 1
             sensor_id = sensor["id"]
-            pollutant_type = sensor["parameter"]["name"]
 
             writer.writerow([
                 sensor_id,
@@ -49,4 +61,5 @@ with open(DATA_ROOT + "sensors.csv", "w", newline="", encoding="utf-8") as f:
                 first_reading,
                 last_reading
             ])
+
     print(f"Saved rows: {rows}")
