@@ -40,8 +40,6 @@ elif lag > 0:
 else:
     st.sidebar.write(f"Comparing pollution with weather {-lag} hours **before**.")
 
-st.sidebar.link_button("Kuba's FB page", "https://www.facebook.com/profile.php?id=100010964948129")
-
 # filter for selected sensor id, should come from the map
 readings_by_sensor = readings[readings["sensor_id"] == sensor_id]
 
@@ -50,7 +48,7 @@ lag_steps = - lag // 6
 readings_by_sensor[weather_param] = readings_by_sensor[weather_param].shift(lag_steps)
 readings_by_sensor = readings_by_sensor.dropna(subset=[weather_param])
 
-# filter -1 readings
+# filter minus
 readings_by_sensor_filtered = readings_by_sensor[readings_by_sensor["reading_value"] >= 0]
 
 # Two-tab layout for filtered and unfiltered values
