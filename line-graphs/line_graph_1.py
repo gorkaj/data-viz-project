@@ -57,6 +57,8 @@ weather = st.sidebar.selectbox("Weather", ["wind_speed","rain"])
 # Filter data by sensor_id
 data = readings[readings["sensor_id"] == sensor_id].copy().sort_values("reading_datetime")
 
+data = data[data["reading_value"]>=0]
+
 if data.empty:
     st.warning("No data found for that sensor.")
     st.stop()
