@@ -39,6 +39,7 @@ elif lag > 0:
     st.sidebar.write(f"Comparing pollution with weather {lag} hours **later**.")
 else:
     st.sidebar.write(f"Comparing pollution with weather {-lag} hours **before**.")
+st.sidebar.write(sensors[sensors["sensor_id"] == sensor_id]["unit"])
 
 # filter for selected sensor id, should come from the map
 readings_by_sensor = readings[readings["sensor_id"] == sensor_id]
