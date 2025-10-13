@@ -1,0 +1,21 @@
+# ---------- Theme Settings ----------
+[theme]
+base="light"  # Options: "light" or "dark"
+primaryColor="#1f77b4"
+backgroundColor="#0e1117"
+secondaryBackgroundColor="#262730"
+textColor="#fafafa"
+font="sans serif"  # Options: "sans serif", "serif", "monospace"
+
+# ---------- Page Settings ----------
+[server]
+headless=true
+enableCORS=false
+
+[runner]
+magicEnabled=true
+
+[global]
+# Default wide layout
+pageTitle="HDI Components Explorer"
+pageIcon="🌍"
