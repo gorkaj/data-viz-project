@@ -4,11 +4,11 @@
 - filter out non-countries
 
 ## Map view (A)
-- on hover: country name, hdi and raw components values
-- add filters: by three indices
+- on hover: country name, hdi and raw components values ✅
+- add filters: by three indices ✅
 
 ## Radar plot (K)
-- figure out colorscale
+- figure out colorscale 
 - try out not filling the inside
 - display only value on hover
 - write HDI value for selected countries to the side
@@ -20,5 +20,5 @@
 - try plotting also HDI with other line style
 
 ## Scatter plot (A)
-- put nice labels
-- make hover pretty
+- put nice labels ✅
+- make hover pretty ✅
