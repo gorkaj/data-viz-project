@@ -31,19 +31,23 @@ with tab1:
     st.subheader("Global HDI Overview")
     col1, col2 = st.columns([1, 3])
 
+    label_map = {
+    "hdi": "HDI",
+    "life_expectancy_index": "Life Expectancy Index",
+    "education_index": "Education Index",
+    "income_index": "Income Index"
+}
+
     with col1:
         year_map = st.slider("Select Year", 1990, 2023, 2023, key="map_slider")
-        selection = st.selectbox("Select Component", ("Human Development Index", "Life Expectancy Index", "Education Index", "Income Index"))
-        column_map = {
-        "Human Development Index": "hdi",
-        "Life Expectancy Index": "life_expectancy_index",
-        "Education Index": "education_index",
-        "Income Index": "income_index"
-        }
-        selected_component = column_map[selection]
+        selection = st.selectbox(
+            "Select Component",
+            tuple(label_map.keys()),
+            format_func=lambda x: label_map.get(x, x)
+        )
 
     with col2:
-        hdi_col = f"{selected_component}_{year_map}"
+        hdi_col = f"{selection}_{year_map}"
         fig_map = px.choropleth(
             df,
             locations="iso3",
@@ -54,9 +58,9 @@ with tab1:
                 f"life_expectancy_index_{year_map}": ':.3f',
                 f"education_index_{year_map}": ':.3f',
                 f"income_index_{year_map}": ':.3f',
-                "iso3": False,   # hide iso3 from hover
+                "iso3": False,
             },
-            labels={  # <-- friendly labels go here
+            labels={
                 f"hdi_{year_map}": "HDI",
                 f"life_expectancy_index_{year_map}": "Life Expectancy Index",
                 f"education_index_{year_map}": "Education Index",
@@ -64,10 +68,12 @@ with tab1:
             },
             color_continuous_scale="Viridis",
             range_color=[0, 1],
-            title=f"{selection} by Country ({year_map})"
+            title=f"{label_map[selection]} by Country ({year_map})"  # ✅ use label_map here
         )
-        fig_map.update_layout(width=1000, height=700)
+
+        fig_map.update_layout(height=700)
         st.plotly_chart(fig_map, use_container_width=True)
+
 
 # ---------------------------
 # 2. RADAR PLOT
@@ -195,10 +201,23 @@ with tab4:
     with col2:
         fig_scatter = px.scatter(
             df,
-            x=f"{x_axis}_{year_scatter}" if x_axis != f"hdi_{year_scatter}" else x_axis,
-            y=f"{y_axis}_{year_scatter}" if y_axis != f"hdi_{year_scatter}" else y_axis,
+            x=f"{x_axis}_{year_scatter}",
+            y=f"{y_axis}_{year_scatter}",
             color=f"hdi_{year_scatter}",
             hover_name="country",
+            hover_data={
+                f"hdi_{year_scatter}": ':.3f',
+                f"life_expectancy_index_{year_scatter}": ':.3f',
+                f"education_index_{year_scatter}": ':.3f',
+                f"income_index_{year_scatter}": ':.3f',
+                "iso3": False,   # hide iso3 from hover
+            },
+            labels={  # <-- friendly labels go here
+                f"hdi_{year_scatter}": "HDI",
+                f"life_expectancy_index_{year_scatter}": "Life Expectancy Index",
+                f"education_index_{year_scatter}": "Education Index",
+                f"income_index_{year_scatter}": "Income Index",
+            },
             color_continuous_scale="Viridis",
             range_color=[0, 1],
             title="HDI Component Relationships (Normalized 0–1)"
