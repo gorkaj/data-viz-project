@@ -33,17 +33,38 @@ with tab1:
 
     with col1:
         year_map = st.slider("Select Year", 1990, 2023, 2023, key="map_slider")
+        selection = st.selectbox("Select Component", ("Human Development Index", "Life Expectancy Index", "Education Index", "Income Index"))
+        column_map = {
+        "Human Development Index": "hdi",
+        "Life Expectancy Index": "life_expectancy_index",
+        "Education Index": "education_index",
+        "Income Index": "income_index"
+        }
+        selected_component = column_map[selection]
 
     with col2:
-        hdi_col = f"hdi_{year_map}"
+        hdi_col = f"{selected_component}_{year_map}"
         fig_map = px.choropleth(
             df,
             locations="iso3",
             color=hdi_col,
             hover_name="country",
+            hover_data={
+                f"hdi_{year_map}": ':.3f',
+                f"life_expectancy_index_{year_map}": ':.3f',
+                f"education_index_{year_map}": ':.3f',
+                f"income_index_{year_map}": ':.3f',
+                "iso3": False,   # hide iso3 from hover
+            },
+            labels={  # <-- friendly labels go here
+                f"hdi_{year_map}": "HDI",
+                f"life_expectancy_index_{year_map}": "Life Expectancy Index",
+                f"education_index_{year_map}": "Education Index",
+                f"income_index_{year_map}": "Income Index",
+            },
             color_continuous_scale="Viridis",
             range_color=[0, 1],
-            title=f"HDI by Country ({year_map})"
+            title=f"{selection} by Country ({year_map})"
         )
         fig_map.update_layout(width=1000, height=700)
         st.plotly_chart(fig_map, use_container_width=True)
