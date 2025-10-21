@@ -159,6 +159,10 @@ with tab3:
                     name=f"{country} - {label}"
                 ))
 
+        line_fig.update_traces(
+            hovertemplate="Year=%{x}<br>Index=%{y:.3f}<extra></extra>"
+        )
+
         line_fig.update_layout(
             xaxis_title="Year",
             yaxis_title="Index (0–1)",
