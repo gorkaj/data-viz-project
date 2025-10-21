@@ -134,7 +134,8 @@ with tab3:
             "Select Countries",
             sorted(df["country"].unique()),
             default=["Norway"],
-            key="line_countries"
+            key="line_countries",
+            max_selections=2
         )
 
     with col2:
