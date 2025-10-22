@@ -14,10 +14,10 @@
 - write HDI value for selected countries to the side
 
 ## Line chart (G)
-- limit to two countries
-- explore colorscale: same hue for a component, different brightness for country?
-- display only year, value on hover
-- try plotting also HDI with other line style
+- limit to two countries ✅
+- explore colorscale: same hue for a component, different brightness for country? ✅
+- display only year, value on hover ✅
+- try plotting also HDI with other line style ✅
 
 ## Scatter plot (A)
 - put nice labels ✅
