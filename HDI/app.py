@@ -129,6 +129,24 @@ with tab3:
     st.subheader("Temporal Trends of HDI Components (Indices)")
     col1, col2 = st.columns([1, 3])
 
+    base_hues = {
+        "Life Expectancy Index": 165,  # teal
+        "Education Index": 25,  # orange
+        "Income Index": 254,  # purple
+    }
+    sat = 70  # saturation
+    luminance_steps = [45, 70]  # darker for 1st country, lighter for 2nd
+
+
+    def color_for(component_label: str, country_idx: int) -> str:
+        lum = luminance_steps[country_idx % len(luminance_steps)]
+        if component_label == "HDI":
+            # grey, no hue
+            return f"hsl(0, 0%, {lum}%)"
+        else:
+            hue = base_hues[component_label]
+            return f"hsl({hue}, {sat}%, {lum}%)"
+
     with col1:
         countries_line = st.multiselect(
             "Select Countries",
@@ -139,10 +157,10 @@ with tab3:
         )
 
     with col2:
-        years_range = [y for y in range(1990, 2024)]
+        years_range = list(range(1990, 2024))
         line_fig = go.Figure()
 
-        for country in countries_line:
+        for c_idx, country in enumerate(countries_line):
             for comp, label in zip(
                     ["life_expectancy_index", "education_index", "income_index"],
                     ["Life Expectancy Index", "Education Index", "Income Index"]
@@ -153,10 +171,32 @@ with tab3:
                     for y in years_range
                 ]
                 line_fig.add_trace(go.Scatter(
+                    x=years_range, y=vals, mode="lines",
+                    name=f"{country} - {label}",
+                    legendgroup=label,  # legend grouped by component
+                    line=dict(color=color_for(label, c_idx), width=2)
+                    )
+                )
+
+            # HDI plotting
+            hdi_cols = [f"hdi_{y}" for y in years_range]
+            if any(col in df.columns for col in hdi_cols):
+                hdi_vals = [
+                    df.loc[df["country"] == country, f"hdi_{y}"].values[0]
+                    if f"hdi_{y}" in df.columns else None
+                    for y in years_range
+                ]
+                line_fig.add_trace(go.Scatter(
                     x=years_range,
-                    y=vals,
+                    y=hdi_vals,
                     mode="lines",
-                    name=f"{country} - {label}"
+                    name=f"{country} - HDI",
+                    legendgroup="HDI",
+                    line=dict(
+                        color=color_for("HDI", c_idx),
+                        width=2,
+                        dash="dash"
+                    )
                 ))
 
         line_fig.update_traces(
