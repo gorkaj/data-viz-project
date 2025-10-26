@@ -1,13 +1,14 @@
-import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import streamlit as st
 
 # ---------------------------
 # Load data
 # ---------------------------
 def load_data():
     return pd.read_csv("hdi_processed.csv")
+
 
 df = load_data()
 
@@ -32,11 +33,11 @@ with tab1:
     col1, col2 = st.columns([1, 3])
 
     label_map = {
-    "hdi": "HDI",
-    "life_expectancy_index": "Life Expectancy Index",
-    "education_index": "Education Index",
-    "income_index": "Income Index"
-}
+        "hdi": "HDI",
+        "life_expectancy_index": "Life Expectancy Index",
+        "education_index": "Education Index",
+        "income_index": "Income Index"
+    }
 
     with col1:
         year_map = st.slider("Select Year", 1990, 2023, 2023, key="map_slider")
@@ -74,12 +75,11 @@ with tab1:
         fig_map.update_layout(height=700)
         st.plotly_chart(fig_map, use_container_width=True)
 
-
 # ---------------------------
 # 2. RADAR PLOT
 # ---------------------------
 with tab2:
-    st.subheader("Component Comparison (Radar Plot — normalized 0–1)")
+    st.subheader("Component Comparison")
     col1, col2 = st.columns([1, 3])
 
     with col1:
@@ -87,39 +87,70 @@ with tab2:
         countries_radar = st.multiselect(
             "Select Countries",
             sorted(df["country"].unique()),
-            default=["Norway"],
             key="radar_countries"
         )
+
+        if countries_radar:
+            hdi_values = []
+            countries_radar_valid = []
+            for country in countries_radar:
+                hdi = df.loc[df["country"] == country, f"hdi_{year_radar}"].values[0]
+                if pd.notna(hdi):
+                    countries_radar_valid.append(country)
+                    hdi_values.append(hdi)
+            countries_radar = countries_radar_valid
+
+            st.markdown("### HDI Values")
+            hdi_table = pd.DataFrame({
+                "Country": countries_radar,
+                f"HDI ({year_radar})": [f"{h:.3f}" for h in hdi_values]
+            })
+
+            st.dataframe(hdi_table, hide_index=True, use_container_width=True)
+        else:
+            hdi_values = []
 
     with col2:
         categories = ["Life Expectancy Index", "Education Index", "Income Index"]
         radar_fig = go.Figure()
-        colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]
 
-        for i, country in enumerate(countries_radar):
-            row = df[df["country"] == country].iloc[0]
-            values = [
-                row[f"life_expectancy_index_{year_radar}"],
-                row[f"education_index_{year_radar}"],
-                row[f"income_index_{year_radar}"],
-            ]
-            values.append(values[0])  # close the polygon
-            theta = categories + [categories[0]]
+        if countries_radar:
+            min_hdi, max_hdi = min(hdi_values), max(hdi_values)
+            norm = [(h - min_hdi) / (max_hdi - min_hdi + 1e-9) for h in hdi_values]
 
-            radar_fig.add_trace(go.Scatterpolar(
-                r=values,
-                theta=theta,
-                fill='toself',
-                name=country,
-                line_color=colors[i % len(colors)]
-            ))
+            colorscale = px.colors.sequential.Viridis
+
+            for i, country in enumerate(countries_radar):
+                row = df[df["country"] == country].iloc[0]
+                values = [
+                    row[f"life_expectancy_index_{year_radar}"],
+                    row[f"education_index_{year_radar}"],
+                    row[f"income_index_{year_radar}"],
+                ]
+
+                values.append(values[0])
+                theta = categories + [categories[0]]
+
+                color_idx = int(norm[i] * (len(colorscale) - 1))
+                color = colorscale[color_idx]
+
+                radar_fig.add_trace(go.Scatterpolar(
+                    r=values,
+                    theta=theta,
+                    fill=None,
+                    name=country,
+                    line_color=color,
+                    line_width=3,
+                    hovertemplate="%{r:.3f}",
+                ))
 
         radar_fig.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 1.2])),
             showlegend=True,
             width=800,
-            height=800
+            height=800,
         )
+
         st.plotly_chart(radar_fig, use_container_width=True)
 
 # ---------------------------
@@ -146,6 +177,7 @@ with tab3:
         else:
             hue = base_hues[component_label]
             return f"hsl({hue}, {sat}%, {lum}%)"
+
 
     with col1:
         countries_line = st.multiselect(
@@ -175,7 +207,7 @@ with tab3:
                     name=f"{country} - {label}",
                     legendgroup=label,  # legend grouped by component
                     line=dict(color=color_for(label, c_idx), width=2)
-                    )
+                )
                 )
 
             # HDI plotting
@@ -255,7 +287,7 @@ with tab4:
                 f"life_expectancy_index_{year_scatter}": ':.3f',
                 f"education_index_{year_scatter}": ':.3f',
                 f"income_index_{year_scatter}": ':.3f',
-                "iso3": False,   # hide iso3 from hover
+                "iso3": False,  # hide iso3 from hover
             },
             labels={  # <-- friendly labels go here
                 f"hdi_{year_scatter}": "HDI",
