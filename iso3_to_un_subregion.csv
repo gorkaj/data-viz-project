@@ -1,0 +1,196 @@
+iso3,subregion,subregion_abbrev
+AFG,Southern Asia,SAS
+AGO,Middle Africa,MAF
+ALB,Southern Europe,SEU
+AND,Southern Europe,SEU
+ARE,Western Asia,WAS
+ARG,South America,SAM
+ARM,Western Asia,WAS
+ATG,Caribbean,CAR
+AUS,Australia and New Zealand,ANZ
+AUT,Western Europe,WEU
+AZE,Western Asia,WAS
+BDI,Eastern Africa,EAF
+BEL,Western Europe,WEU
+BEN,Western Africa,WAF
+BFA,Western Africa,WAF
+BGD,Southern Asia,SAS
+BGR,Eastern Europe,EEU
+BHR,Western Asia,WAS
+BHS,Caribbean,CAR
+BIH,Southern Europe,SEU
+BLR,Eastern Europe,EEU
+BLZ,Central America,CAM
+BOL,South America,SAM
+BRA,South America,SAM
+BRB,Caribbean,CAR
+BRN,South-eastern Asia,SEAS
+BTN,Southern Asia,SAS
+BWA,Southern Africa,SAF
+CAF,Middle Africa,MAF
+CAN,Northern America,NAM
+CHE,Western Europe,WEU
+CHL,South America,SAM
+CHN,Eastern Asia,EAS
+CIV,Western Africa,WAF
+CMR,Middle Africa,MAF
+COD,Middle Africa,MAF
+COG,Middle Africa,MAF
+COL,South America,SAM
+COM,Eastern Africa,EAF
+CPV,Western Africa,WAF
+CRI,Central America,CAM
+CUB,Caribbean,CAR
+CYP,Western Asia,WAS
+CZE,Eastern Europe,EEU
+DEU,Western Europe,WEU
+DJI,Eastern Africa,EAF
+DMA,Caribbean,CAR
+DNK,Northern Europe,NEU
+DOM,Caribbean,CAR
+DZA,Northern Africa,NAF
+ECU,South America,SAM
+EGY,Northern Africa,NAF
+ERI,Eastern Africa,EAF
+ESP,Southern Europe,SEU
+EST,Northern Europe,NEU
+ETH,Eastern Africa,EAF
+FIN,Northern Europe,NEU
+FJI,Melanesia,MEL
+FRA,Western Europe,WEU
+FSM,Micronesia,MIC
+GAB,Middle Africa,MAF
+GBR,Northern Europe,NEU
+GEO,Western Asia,WAS
+GHA,Western Africa,WAF
+GIN,Western Africa,WAF
+GMB,Western Africa,WAF
+GNB,Western Africa,WAF
+GNQ,Middle Africa,MAF
+GRC,Southern Europe,SEU
+GRD,Caribbean,CAR
+GTM,Central America,CAM
+GUY,South America,SAM
+HKG,Eastern Asia,EAS
+HND,Central America,CAM
+HRV,Southern Europe,SEU
+HTI,Caribbean,CAR
+HUN,Eastern Europe,EEU
+IDN,South-eastern Asia,SEAS
+IND,Southern Asia,SAS
+IRL,Northern Europe,NEU
+IRN,Southern Asia,SAS
+IRQ,Western Asia,WAS
+ISL,Northern Europe,NEU
+ISR,Western Asia,WAS
+ITA,Southern Europe,SEU
+JAM,Caribbean,CAR
+JOR,Western Asia,WAS
+JPN,Eastern Asia,EAS
+KAZ,Central Asia,CAS
+KEN,Eastern Africa,EAF
+KGZ,Central Asia,CAS
+KHM,South-eastern Asia,SEAS
+KIR,Micronesia,MIC
+KNA,Caribbean,CAR
+KOR,Eastern Asia,EAS
+KWT,Western Asia,WAS
+LAO,South-eastern Asia,SEAS
+LBN,Western Asia,WAS
+LBR,Western Africa,WAF
+LBY,Northern Africa,NAF
+LCA,Caribbean,CAR
+LIE,Western Europe,WEU
+LKA,Southern Asia,SAS
+LSO,Southern Africa,SAF
+LTU,Northern Europe,NEU
+LUX,Western Europe,WEU
+LVA,Northern Europe,NEU
+MAR,Northern Africa,NAF
+MCO,Western Europe,WEU
+MDA,Eastern Europe,EEU
+MDG,Eastern Africa,EAF
+MDV,Southern Asia,SAS
+MEX,Central America,CAM
+MHL,Micronesia,MIC
+MKD,Southern Europe,SEU
+MLI,Western Africa,WAF
+MLT,Southern Europe,SEU
+MMR,South-eastern Asia,SEAS
+MNE,Southern Europe,SEU
+MNG,Eastern Asia,EAS
+MOZ,Eastern Africa,EAF
+MRT,Western Africa,WAF
+MUS,Eastern Africa,EAF
+MWI,Eastern Africa,EAF
+MYS,South-eastern Asia,SEAS
+NAM,Southern Africa,SAF
+NER,Western Africa,WAF
+NGA,Western Africa,WAF
+NIC,Central America,CAM
+NLD,Western Europe,WEU
+NOR,Northern Europe,NEU
+NPL,Southern Asia,SAS
+NRU,Micronesia,MIC
+NZL,Australia and New Zealand,ANZ
+OMN,Western Asia,WAS
+PAK,Southern Asia,SAS
+PAN,Central America,CAM
+PER,South America,SAM
+PHL,South-eastern Asia,SEAS
+PLW,Micronesia,MIC
+PNG,Melanesia,MEL
+POL,Eastern Europe,EEU
+PRK,Eastern Asia,EAS
+PRT,Southern Europe,SEU
+PRY,South America,SAM
+PSE,Western Asia,WAS
+QAT,Western Asia,WAS
+ROU,Eastern Europe,EEU
+RUS,Eastern Europe,EEU
+RWA,Eastern Africa,EAF
+SAU,Western Asia,WAS
+SDN,Northern Africa,NAF
+SEN,Western Africa,WAF
+SGP,South-eastern Asia,SEAS
+SLB,Melanesia,MEL
+SLE,Western Africa,WAF
+SLV,Central America,CAM
+SMR,Southern Europe,SEU
+SOM,Eastern Africa,EAF
+SRB,Southern Europe,SEU
+SSD,Eastern Africa,EAF
+STP,Middle Africa,MAF
+SUR,South America,SAM
+SVK,Eastern Europe,EEU
+SVN,Southern Europe,SEU
+SWE,Northern Europe,NEU
+SWZ,Southern Africa,SAF
+SYC,Eastern Africa,EAF
+SYR,Western Asia,WAS
+TCD,Middle Africa,MAF
+TGO,Western Africa,WAF
+THA,South-eastern Asia,SEAS
+TJK,Central Asia,CAS
+TKM,Central Asia,CAS
+TLS,South-eastern Asia,SEAS
+TON,Polynesia,POL
+TTO,Caribbean,CAR
+TUN,Northern Africa,NAF
+TUR,Western Asia,WAS
+TUV,Polynesia,POL
+TZA,Eastern Africa,EAF
+UGA,Eastern Africa,EAF
+UKR,Eastern Europe,EEU
+URY,South America,SAM
+USA,Northern America,NAM
+UZB,Central Asia,CAS
+VCT,Caribbean,CAR
+VEN,South America,SAM
+VNM,South-eastern Asia,SEAS
+VUT,Melanesia,MEL
+WSM,Polynesia,POL
+YEM,Western Asia,WAS
+ZAF,Southern Africa,SAF
+ZMB,Eastern Africa,EAF
+ZWE,Eastern Africa,EAF
