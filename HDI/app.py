@@ -73,7 +73,7 @@ with tab1:
         )
 
         fig_map.update_layout(height=700)
-        st.plotly_chart(fig_map, use_container_width=True)
+        st.plotly_chart(fig_map, width="stretch")
 
 # ---------------------------
 # 2. RADAR PLOT
@@ -106,7 +106,7 @@ with tab2:
                 f"HDI ({year_radar})": [f"{h:.3f}" for h in hdi_values]
             })
 
-            st.dataframe(hdi_table, hide_index=True, use_container_width=True)
+            st.dataframe(hdi_table, hide_index=True, width="stretch")
         else:
             hdi_values = []
 
@@ -151,7 +151,7 @@ with tab2:
             height=800,
         )
 
-        st.plotly_chart(radar_fig, use_container_width=True)
+        st.plotly_chart(radar_fig, width="stretch")
 
 # ---------------------------
 # 3. TEMPORAL TRENDS
@@ -242,7 +242,7 @@ with tab3:
             width=1000,
             height=600
         )
-        st.plotly_chart(line_fig, use_container_width=True)
+        st.plotly_chart(line_fig, width="stretch")
 
 # ---------------------------
 # 4. SCATTER PLOT
@@ -305,4 +305,4 @@ with tab4:
             xaxis=dict(range=[0, 1.1]),
             yaxis=dict(range=[0, 1.1])
         )
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        st.plotly_chart(fig_scatter, width="stretch")

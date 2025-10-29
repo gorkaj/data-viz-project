@@ -1,24 +1,25 @@
-# Ideas
+# General
+- layout (G)
+- deploy (K)
 
-## Data (K)
-- filter out non-countries ✅
+## Data (A)
+- fill missing regions
 
-## Map view (A)
-- on hover: country name, hdi and raw components values ✅
-- add filters: by three indices ✅
+## Map view (G)
+- readable values
+
 
 ## Radar plot (K)
-- figure out colorscale ✅
-- try out not filling the inside ✅
-- display only value on hover ✅
-- write HDI value for selected countries to the side ✅
+- readable values
+- color scale
+- limit entries
+- show if missing HDI in table
 
 ## Line chart (G)
-- limit to two countries ✅
-- explore colorscale: same hue for a component, different brightness for country? ✅
-- display only year, value on hover ✅
-- try plotting also HDI with other line style ✅
+- readable values
+
 
 ## Scatter plot (A)
-- put nice labels ✅
-- make hover pretty ✅
+- readable values
+- don't display NaN HDI
+- select by region
