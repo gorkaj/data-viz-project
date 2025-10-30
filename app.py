@@ -274,31 +274,70 @@ with tab4:
             }.get(x, x),
             key="scatter_y"
         )
+        regions = st.multiselect(
+            "Select Regions",
+            sorted(df["subregion"].unique()),
+            key="multiselect_scatter"
+        )
 
     with col2:
+        df_scatter = df.dropna(subset=[f"hdi_{year_scatter}"]).reset_index(drop=True)
+
         fig_scatter = px.scatter(
-            df,
+            df_scatter,
             x=f"{x_axis}_{year_scatter}",
             y=f"{y_axis}_{year_scatter}",
             color=f"hdi_{year_scatter}",
             hover_name="country",
-            hover_data={
-                f"hdi_{year_scatter}": ':.3f',
-                f"life_expectancy_index_{year_scatter}": ':.3f',
-                f"education_index_{year_scatter}": ':.3f',
-                f"income_index_{year_scatter}": ':.3f',
-                "iso3": False,  # hide iso3 from hover
-            },
-            labels={  # <-- friendly labels go here
+            color_continuous_scale="Viridis",
+            range_color=[0, 1],
+            title="HDI Component Relationships (Normalized 0–1)",
+            labels={
                 f"hdi_{year_scatter}": "HDI",
                 f"life_expectancy_index_{year_scatter}": "Life Expectancy Index",
                 f"education_index_{year_scatter}": "Education Index",
                 f"income_index_{year_scatter}": "Income Index",
             },
-            color_continuous_scale="Viridis",
-            range_color=[0, 1],
-            title="HDI Component Relationships (Normalized 0–1)"
         )
+
+        fig_scatter.update_traces(
+            hovertemplate=(
+                "<b>%{hovertext}</b><br>"
+                f"<i>%{{customdata[5]}}</i><br><br>"
+                f"HDI: %{{customdata[0]:.3f}}<br>"
+                f"Life Expectancy: %{{customdata[1]:.1f}} y<br>"
+                f"Mean Years of Schooling: %{{customdata[2]:.1f}} y<br>"
+                f"Expected Years of Schooling: %{{customdata[3]:.1f}} y<br>"
+                f"GNI per capita: %{{customdata[4]:.1f}} USD<br>"
+                "<extra></extra>"
+            ),
+            customdata=df_scatter[
+                [
+                    f"hdi_{year_scatter}",
+                    f"le_{year_scatter}",
+                    f"mys_{year_scatter}",
+                    f"eys_{year_scatter}",
+                    f"gnipc_{year_scatter}",
+                    f"subregion"
+                ]
+            ],
+            marker=dict(size=8),
+        )
+
+        if regions:
+            mask = df_scatter["subregion"].isin(regions).tolist()
+            selected_idx = [i for i, ok in enumerate(mask) if ok] 
+            fig_scatter.update_traces(
+                selectedpoints=selected_idx,
+                selected=dict(marker=dict(opacity=1.0, size=9)),
+                unselected=dict(marker=dict(opacity=0.2, size=7)),
+            )
+        else:
+            fig_scatter.update_traces(
+                selectedpoints=None,
+                selected=dict(marker=dict(opacity=1.0)),
+                unselected=dict(marker=dict(opacity=1.0)),
+            )
         fig_scatter.update_layout(
             width=800,
             height=800,
@@ -306,3 +345,4 @@ with tab4:
             yaxis=dict(range=[0, 1.1])
         )
         st.plotly_chart(fig_scatter, width="stretch")
+

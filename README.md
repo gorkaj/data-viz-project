@@ -3,7 +3,7 @@
 - deploy (K)
 
 ## Data (A)
-- fill missing regions
+- add regions ✅
 
 ## Map view (G)
 - readable values
@@ -20,6 +20,6 @@
 
 
 ## Scatter plot (A)
-- readable values
-- don't display NaN HDI
-- select by region
+- readable values ✅
+- don't display NaN HDI ✅
+- select by region ✅
