@@ -12,8 +12,10 @@ def load_data():
 
 df = load_data()
 
-st.set_page_config(page_title="HDI Components Explorer", layout="wide")
-st.title("🌍 Human Development Index (HDI) Components Explorer")
+st.set_page_config(
+    page_title="HDI Components Explorer",
+    page_icon="🌍",
+    layout="wide")
 
 # ---------------------------
 # Tabs layout
@@ -69,11 +71,10 @@ with tab1:
             },
             color_continuous_scale="Viridis",
             range_color=[0, 1],
-            title=f"{label_map[selection]} by Country ({year_map})"  # ✅ use label_map here
         )
 
         fig_map.update_layout(height=700)
-        st.plotly_chart(fig_map, width="stretch")
+        st.plotly_chart(fig_map, config={"responsive": True}, use_container_width=True)
 
 # ---------------------------
 # 2. RADAR PLOT
@@ -180,7 +181,7 @@ with tab2:
             height=800,
         )
 
-        st.plotly_chart(radar_fig, width="stretch")
+        st.plotly_chart(radar_fig, config={"responsive": True}, use_container_width=True)
 
 # ---------------------------
 # 3. TEMPORAL TRENDS
@@ -271,7 +272,7 @@ with tab3:
             width=1000,
             height=600
         )
-        st.plotly_chart(line_fig, width="stretch")
+        st.plotly_chart(line_fig, config={"responsive": True}, use_container_width=True)
 
 # ---------------------------
 # 4. SCATTER PLOT
@@ -320,7 +321,6 @@ with tab4:
             hover_name="country",
             color_continuous_scale="Viridis",
             range_color=[0, 1],
-            title="HDI Component Relationships (Normalized 0–1)",
             labels={
                 f"hdi_{year_scatter}": "HDI",
                 f"life_expectancy_index_{year_scatter}": "Life Expectancy Index",
@@ -373,5 +373,4 @@ with tab4:
             xaxis=dict(range=[0, 1.1]),
             yaxis=dict(range=[0, 1.1])
         )
-        st.plotly_chart(fig_scatter, width="stretch")
-
+        st.plotly_chart(fig_scatter, config={"responsive": True}, use_container_width=True)

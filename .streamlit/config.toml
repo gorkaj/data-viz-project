@@ -10,7 +10,3 @@ enableXsrfProtection = true
 
 [client]
 toolbarMode = "auto"
-
-[ui]
-pageTitle = "HDI Components Explorer"
-pageIcon = "🌍"
