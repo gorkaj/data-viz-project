@@ -10,10 +10,10 @@
 
 
 ## Radar plot (K)
-- readable values
-- color scale
-- limit entries
-- show if missing HDI in table
+- readable values ✅
+- color scale ✅
+- limit entries ✅
+- show if missing HDI in table ✅
 
 ## Line chart (G)
 - readable values

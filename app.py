@@ -87,26 +87,34 @@ with tab2:
         countries_radar = st.multiselect(
             "Select Countries",
             sorted(df["country"].unique()),
-            key="radar_countries"
+            key="radar_countries",
+            max_selections=5
         )
 
         if countries_radar:
             hdi_values = []
             countries_radar_valid = []
+            hdi_display_values = []
+
             for country in countries_radar:
-                hdi = df.loc[df["country"] == country, f"hdi_{year_radar}"].values[0]
+                hdi_series = df.loc[df["country"] == country, f"hdi_{year_radar}"]
+                hdi = hdi_series.values[0] if not hdi_series.empty else None
+
                 if pd.notna(hdi):
                     countries_radar_valid.append(country)
                     hdi_values.append(hdi)
-            countries_radar = countries_radar_valid
+                    hdi_display_values.append(f"{hdi:.3f}")
+                else:
+                    hdi_display_values.append("Not available")
 
             st.markdown("### HDI Values")
             hdi_table = pd.DataFrame({
                 "Country": countries_radar,
-                f"HDI ({year_radar})": [f"{h:.3f}" for h in hdi_values]
+                f"HDI ({year_radar})": hdi_display_values
             })
-
             st.dataframe(hdi_table, hide_index=True, width="stretch")
+
+            countries_radar = countries_radar_valid
         else:
             hdi_values = []
 
@@ -115,33 +123,54 @@ with tab2:
         radar_fig = go.Figure()
 
         if countries_radar:
-            min_hdi, max_hdi = min(hdi_values), max(hdi_values)
-            norm = [(h - min_hdi) / (max_hdi - min_hdi + 1e-9) for h in hdi_values]
-
-            colorscale = px.colors.sequential.Viridis
+            color_palette = ["#008c5c", "#002f64", "#9b54f3", "#f98517", "#561e01"]
 
             for i, country in enumerate(countries_radar):
                 row = df[df["country"] == country].iloc[0]
-                values = [
-                    row[f"life_expectancy_index_{year_radar}"],
-                    row[f"education_index_{year_radar}"],
-                    row[f"income_index_{year_radar}"],
-                ]
 
-                values.append(values[0])
+                le_index = row[f"life_expectancy_index_{year_radar}"]
+                edu_index = row[f"education_index_{year_radar}"]
+                inc_index = row[f"income_index_{year_radar}"]
+                values = [le_index, edu_index, inc_index, le_index]
                 theta = categories + [categories[0]]
 
-                color_idx = int(norm[i] * (len(colorscale) - 1))
-                color = colorscale[color_idx]
+                le = row.get(f"le_{year_radar}", None)
+                mys = row.get(f"mys_{year_radar}", None)
+                eys = row.get(f"eys_{year_radar}", None)
+                gnipc = row.get(f"gnipc_{year_radar}", None)
+                subregion = row.get("subregion", "Unknown")
+
+                hover_texts = [
+                    f"<b>{country}</b><br><i>{subregion}</i><br><br>"
+                    f"Life Expectancy Index: {le_index:.3f}<br>"
+                    f"Life Expectancy: {le:.1f} years",
+
+                    f"<b>{country}</b><br><i>{subregion}</i><br><br>"
+                    f"Education Index: {edu_index:.3f}<br>"
+                    f"Mean Years of Schooling: {mys:.1f} years<br>"
+                    f"Expected Years of Schooling: {eys:.1f} years",
+
+                    f"<b>{country}</b><br><i>{subregion}</i><br><br>"
+                    f"Income Index: {inc_index:.3f}<br>"
+                    f"GNI per capita: {gnipc:.1f} USD",
+
+                    # Repeat the first for closure of the polygon
+                    f"<b>{country}</b><br><i>{subregion}</i><br><br>"
+                    f"Life Expectancy Index: {le_index:.3f}<br>"
+                    f"Life Expectancy: {le:.1f} years<br>",
+                ]
+
+                color = color_palette[i % len(color_palette)]
 
                 radar_fig.add_trace(go.Scatterpolar(
                     r=values,
                     theta=theta,
+                    text=hover_texts,
+                    hoverinfo="text",
                     fill=None,
                     name=country,
                     line_color=color,
                     line_width=3,
-                    hovertemplate="%{r:.3f}",
                 ))
 
         radar_fig.update_layout(
