@@ -1,6 +1,6 @@
 # General
 - layout (G)
-- deploy (K)
+- deploy: https://data-viz-hdi-component-explorer.streamlit.app/
 
 ## Data (A)
 - add regions ✅
