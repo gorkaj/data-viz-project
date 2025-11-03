@@ -1,21 +1,16 @@
-# ---------- Theme Settings ----------
 [theme]
-base="light"  # Options: "light" or "dark"
-primaryColor="#1f77b4"
-backgroundColor="#ffffff"            # white background
-secondaryBackgroundColor="#f5f5f5"   # light gray panels
-textColor="#0e1117"                  # dark text
-font="sans serif"  # Options: "sans serif", "serif", "monospace"
+primaryColor = "#4CAF50"
+backgroundColor = "#FFFFFF"
+textColor = "#000000"
 
-# ---------- Page Settings ----------
 [server]
-headless=true
-enableCORS=false
+headless = true
+enableCORS = false
+enableXsrfProtection = true
 
-[runner]
-magicEnabled=true
+[client]
+toolbarMode = "auto"
 
-[global]
-# Default wide layout
-pageTitle="HDI Components Explorer"
-pageIcon="🌍"
+[ui]
+pageTitle = "HDI Components Explorer"
+pageIcon = "🌍"
