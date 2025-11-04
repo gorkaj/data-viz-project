@@ -229,7 +229,7 @@ with tab3:
         "Income Index": 254,  # purple
     }
     sat = 70  # saturation
-    luminance_steps = [45, 70]  # darker for 1st country, lighter for 2nd
+    luminance_steps = [45, 75]  # darker for 1st country, lighter for 2nd
 
 
     def color_for(component_label: str, country_idx: int) -> str:
@@ -246,7 +246,7 @@ with tab3:
         countries_line = st.multiselect(
             "Select Countries",
             sorted(df["country"].unique()),
-            default=["Norway"],
+            # default=["Norway"],
             key="line_countries",
             max_selections=2
         )
@@ -256,6 +256,9 @@ with tab3:
         line_fig = go.Figure()
 
         for c_idx, country in enumerate(countries_line):
+            row = df[df["country"] == country].iloc[0]
+            subregion = row.get("subregion", "Unknown")
+
             for comp, label in zip(
                     ["life_expectancy_index", "education_index", "income_index"],
                     ["Life Expectancy Index", "Education Index", "Income Index"]
@@ -265,13 +268,53 @@ with tab3:
                     if f"{comp}_{y}" in df.columns else None
                     for y in years_range
                 ]
+
+                if comp == "life_expectancy_index":
+                    actuals = [
+                        df.loc[df["country"] == country, f"le_{y}"].values[0]
+                        if f"le_{y}" in df.columns else None
+                        for y in years_range
+                    ]
+                    hovertext = "Life Expectancy: %{customdata:.1f} years"
+                elif comp == "education_index":
+                    mys = [
+                        df.loc[df["country"] == country, f"mys_{y}"].values[0]
+                        if f"mys_{y}" in df.columns else None
+                        for y in years_range
+                    ]
+                    eys = [
+                        df.loc[df["country"] == country, f"eys_{y}"].values[0]
+                        if f"eys_{y}" in df.columns else None
+                        for y in years_range
+                    ]
+                    actuals = list(zip(mys, eys))
+                    hovertext = (
+                        "Mean Years of Schooling: %{customdata[0]:.1f}<br>"
+                        "Expected Years of Schooling: %{customdata[1]:.1f}"
+                    )
+                else:
+                    actuals = [
+                        df.loc[df["country"] == country, f"gnipc_{y}"].values[0]
+                        if f"gnipc_{y}" in df.columns else None
+                        for y in years_range
+                    ]
+                    hovertext = "GNI per capita: %{customdata:.1f} USD"
+
                 line_fig.add_trace(go.Scatter(
-                    x=years_range, y=vals, mode="lines",
+                    x=years_range,
+                    y=vals,
+                    mode="lines",
                     name=f"{country} - {label}",
                     legendgroup=label,  # legend grouped by component
-                    line=dict(color=color_for(label, c_idx), width=2)
-                )
-                )
+                    line=dict(color=color_for(label, c_idx), width=2),
+                    customdata=actuals,
+                    text=[country] * len(years_range),
+                    hovertemplate=(
+                            "<b>%{text}</b><br><i>" + subregion + "</i><br><br>"
+                            "Year: %{x}<br>" + hovertext + "<br>"
+                            + label + ": %{y:.3f}<extra></extra>"
+                    )
+                ))
 
             # HDI plotting
             hdi_cols = [f"hdi_{y}" for y in years_range]
@@ -291,12 +334,11 @@ with tab3:
                         color=color_for("HDI", c_idx),
                         width=2,
                         dash="dash"
-                    )
+                    ),
+                    text=[country] * len(years_range),
+                    hovertemplate="<b>%{text}</b><br><i>" + subregion + "</i><br><br>"
+                                  "Year: %{x}<br>HDI: %{y:.3f}<extra></extra>"
                 ))
-
-        line_fig.update_traces(
-            hovertemplate="Year=%{x}<br>Index=%{y:.3f}<extra></extra>"
-        )
 
         line_fig.update_layout(
             xaxis_title="Year",
