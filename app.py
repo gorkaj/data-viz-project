@@ -51,27 +51,60 @@ with tab1:
 
     with col2:
         hdi_col = f"{selection}_{year_map}"
+        df_map = df.dropna(subset=[hdi_col]).reset_index(drop=True)
+
         fig_map = px.choropleth(
-            df,
+            df_map,
             locations="iso3",
             color=hdi_col,
             hover_name="country",
-            hover_data={
-                f"hdi_{year_map}": ':.3f',
-                f"life_expectancy_index_{year_map}": ':.3f',
-                f"education_index_{year_map}": ':.3f',
-                f"income_index_{year_map}": ':.3f',
-                "iso3": False,
-            },
-            labels={
-                f"hdi_{year_map}": "HDI",
-                f"life_expectancy_index_{year_map}": "Life Expectancy Index",
-                f"education_index_{year_map}": "Education Index",
-                f"income_index_{year_map}": "Income Index",
-            },
             color_continuous_scale="Viridis",
             range_color=[0, 1],
         )
+
+        if selection == "hdi":
+            customdata = df_map[[f"hdi_{year_map}", "subregion"]]
+            hovertemplate = (
+                "<b>%{hovertext}</b><br>"
+                "<i>%{customdata[1]}</i><br><br>"
+                "HDI: %{customdata[0]:.3f}<extra></extra>"
+            )
+
+        elif selection == "life_expectancy_index":
+            customdata = df_map[
+                [f"life_expectancy_index_{year_map}", f"le_{year_map}", "subregion"]
+            ]
+            hovertemplate = (
+                "<b>%{hovertext}</b><br>"
+                "<i>%{customdata[2]}</i><br><br>"
+                "Life Expectancy Index: %{customdata[0]:.3f}<br>"
+                "Life Expectancy: %{customdata[1]:.1f} years<extra></extra>"
+            )
+
+        elif selection == "education_index":
+            customdata = df_map[
+                [f"education_index_{year_map}", f"mys_{year_map}", f"eys_{year_map}", "subregion"]
+            ]
+            hovertemplate = (
+                "<b>%{hovertext}</b><br>"
+                "<i>%{customdata[3]}</i><br><br>"
+                "Education Index: %{customdata[0]:.3f}<br>"
+                "Mean Years of Schooling: %{customdata[1]:.1f}<br>"
+                "Expected Years of Schooling: %{customdata[2]:.1f}<extra></extra>"
+            )
+
+        elif selection == "income_index":
+            customdata = df_map[
+                [f"income_index_{year_map}", f"gnipc_{year_map}", "subregion"]
+            ]
+            hovertemplate = (
+                "<b>%{hovertext}</b><br>"
+                "<i>%{customdata[2]}</i><br><br>"
+                "Income Index: %{customdata[0]:.3f}<br>"
+                "GNI per capita: %{customdata[1]:.1f} USD<extra></extra>"
+            )
+
+        fig_map.update_traces(hovertemplate=hovertemplate, customdata=customdata)
 
         fig_map.update_layout(height=700)
         st.plotly_chart(fig_map, config={"responsive": True}, use_container_width=True)
