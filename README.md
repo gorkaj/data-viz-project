@@ -6,7 +6,7 @@
 - add regions ✅
 
 ## Map view (G)
-- readable values
+- readable values ✅
 
 
 ## Radar plot (K)
@@ -16,7 +16,7 @@
 - show if missing HDI in table ✅
 
 ## Line chart (G)
-- readable values
+- readable values ✅
 
 
 ## Scatter plot (A)
