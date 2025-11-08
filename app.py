@@ -17,6 +17,45 @@ st.set_page_config(
     page_icon="🌍",
     layout="wide")
 
+# Layout adjustments
+st.markdown("""
+<style>
+/* make the streamlit bar smaller*/
+header, .stAppHeader {
+    height: 1.8rem !important;      
+    min-height: 1.8rem !important;
+    padding: 0 0.8rem !important;
+}
+header * {
+    font-size: 0.8rem !important;   
+}
+.block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 0.5rem !important;
+    overflow: hidden !important;  /*blocks scrolling*/
+}
+/* title and subheader spacing*/
+.stSubheader, h2 {
+    margin-top: -1.5rem !important;   /* bring title higher */
+    margin-bottom: 0.3rem !important;
+}
+[data-testid="stHorizontalBlock"] > div {
+        align-self: flex-start !important;
+}
+
+.stPlotlyChart {
+    margin-top: -1rem !important;
+}
+.left-stack { 
+    position: sticky; 
+    top: 3.2rem;              
+    align-self: flex-start; 
+}
+.left-stack > * { margin-bottom: 0.4rem; }  
+
+</style>
+""", unsafe_allow_html=True)
+
 # ---------------------------
 # Tabs layout
 # ---------------------------
@@ -32,7 +71,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # ---------------------------
 with tab1:
     st.subheader("Global HDI Overview")
-    col1, col2 = st.columns([1, 3])
+    col1, col2 = st.columns([1, 3], vertical_alignment="top")
 
     label_map = {
         "hdi": "HDI",
@@ -105,8 +144,7 @@ with tab1:
             )
 
         fig_map.update_traces(hovertemplate=hovertemplate, customdata=customdata)
-
-        fig_map.update_layout(height=700)
+        fig_map.update_layout(height=600)
         st.plotly_chart(fig_map, config={"responsive": True}, use_container_width=True)
 
 # ---------------------------
@@ -114,7 +152,7 @@ with tab1:
 # ---------------------------
 with tab2:
     st.subheader("Component Comparison")
-    col1, col2 = st.columns([1, 3])
+    col1, col2 = st.columns([1, 3], vertical_alignment="top")
 
     with col1:
         year_radar = st.slider("Select Year", 1990, 2023, 2023, key="radar_slider")
@@ -210,8 +248,8 @@ with tab2:
         radar_fig.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 1.2])),
             showlegend=True,
-            width=800,
-            height=800,
+            width=500,
+            height=500,
         )
 
         st.plotly_chart(radar_fig, config={"responsive": True}, use_container_width=True)
@@ -221,7 +259,7 @@ with tab2:
 # ---------------------------
 with tab3:
     st.subheader("Temporal Trends of HDI Components (Indices)")
-    col1, col2 = st.columns([1, 3])
+    col1, col2 = st.columns([1, 3], vertical_alignment="top")
 
     base_hues = {
         "Life Expectancy Index": 165,  # teal
@@ -246,7 +284,7 @@ with tab3:
         countries_line = st.multiselect(
             "Select Countries",
             sorted(df["country"].unique()),
-            # default=["Norway"],
+            default=["Norway"],
             key="line_countries",
             max_selections=2
         )
@@ -254,15 +292,17 @@ with tab3:
     with col2:
         years_range = list(range(1990, 2024))
         line_fig = go.Figure()
+        components = [
+            ("life_expectancy_index", "Life Expectancy Index"),
+            ("education_index", "Education Index"),
+            ("income_index", "Income Index"),
+        ]
 
-        for c_idx, country in enumerate(countries_line):
-            row = df[df["country"] == country].iloc[0]
-            subregion = row.get("subregion", "Unknown")
+        for comp, label in components:
+            for c_idx, country in enumerate(countries_line):
+                row = df[df["country"] == country].iloc[0]
+                subregion = row.get("subregion", "Unknown")
 
-            for comp, label in zip(
-                    ["life_expectancy_index", "education_index", "income_index"],
-                    ["Life Expectancy Index", "Education Index", "Income Index"]
-            ):
                 vals = [
                     df.loc[df["country"] == country, f"{comp}_{y}"].values[0]
                     if f"{comp}_{y}" in df.columns else None
@@ -305,7 +345,7 @@ with tab3:
                     y=vals,
                     mode="lines",
                     name=f"{country} - {label}",
-                    legendgroup=label,  # legend grouped by component
+                    legendgroup=label,  # group by index
                     line=dict(color=color_for(label, c_idx), width=2),
                     customdata=actuals,
                     text=[country] * len(years_range),
@@ -316,37 +356,42 @@ with tab3:
                     )
                 ))
 
-            # HDI plotting
-            hdi_cols = [f"hdi_{y}" for y in years_range]
-            if any(col in df.columns for col in hdi_cols):
-                hdi_vals = [
-                    df.loc[df["country"] == country, f"hdi_{y}"].values[0]
-                    if f"hdi_{y}" in df.columns else None
-                    for y in years_range
-                ]
-                line_fig.add_trace(go.Scatter(
-                    x=years_range,
-                    y=hdi_vals,
-                    mode="lines",
-                    name=f"{country} - HDI",
-                    legendgroup="HDI",
-                    line=dict(
-                        color=color_for("HDI", c_idx),
-                        width=2,
-                        dash="dash"
-                    ),
-                    text=[country] * len(years_range),
-                    hovertemplate="<b>%{text}</b><br><i>" + subregion + "</i><br><br>"
-                                  "Year: %{x}<br>HDI: %{y:.3f}<extra></extra>"
-                ))
+        # HDI plotting
+        for c_idx, country in enumerate(countries_line):
+            hdi_vals = [
+                df.loc[df["country"] == country, f"hdi_{y}"].values[0]
+                if f"hdi_{y}" in df.columns else None
+                for y in years_range
+            ]
+            line_fig.add_trace(go.Scatter(
+                x=years_range,
+                y=hdi_vals,
+                mode="lines",
+                name=f"{country} - HDI",
+                legendgroup="HDI",
+                line=dict(color=color_for("HDI", c_idx), width=2, dash="dash"),
+                text=[country] * len(years_range),
+                hovertemplate="<b>%{text}</b><br>Year: %{x}<br>HDI: %{y:.3f}<extra></extra>"
+            ))
 
         line_fig.update_layout(
             xaxis_title="Year",
             yaxis_title="Index (0–1)",
             yaxis_range=[0, 1.2],
-            width=1000,
-            height=600
+            height=500,
+            margin=dict(l=30, r=20, t=30, b=100),
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="top",  # legend at bottom
+                y=-0.25,  # position below chart
+                xanchor="center",
+                x=0.5,
+                title=None,
+                font=dict(size=9),  # legend text
+            )
         )
+
         st.plotly_chart(line_fig, config={"responsive": True}, use_container_width=True)
 
 # ---------------------------
@@ -354,7 +399,7 @@ with tab3:
 # ---------------------------
 with tab4:
     st.subheader("Relationship Between HDI Components (Indices)")
-    col1, col2 = st.columns([1, 3])
+    col1, col2 = st.columns([1, 3],vertical_alignment="top")
 
     with col1:
         year_scatter = st.slider("Select Year", 1990, 2023, 2023, key="scatter_slider")
@@ -384,6 +429,7 @@ with tab4:
             sorted(df["subregion"].unique()),
             key="multiselect_scatter"
         )
+    st.markdown("<div style='height:0.5rem;'></div>", unsafe_allow_html=True)
 
     with col2:
         df_scatter = df.dropna(subset=[f"hdi_{year_scatter}"]).reset_index(drop=True)
@@ -443,9 +489,18 @@ with tab4:
                 unselected=dict(marker=dict(opacity=1.0)),
             )
         fig_scatter.update_layout(
-            width=800,
-            height=800,
-            xaxis=dict(range=[0, 1.1]),
-            yaxis=dict(range=[0, 1.1])
+            xaxis_title=f"{x_axis.replace('_', ' ').title()} ({year_scatter})",
+            yaxis_title=f"{y_axis.replace('_', ' ').title()} ({year_scatter})",
+            xaxis=dict(range=[0, 1.08]),
+            yaxis=dict(range=[0, 1.12]),
+            height=500,
+            margin=dict(l=40, r=30, t=40, b=40),
+            coloraxis_colorbar=dict(
+                title="HDI",
+                thickness=12,
+                len=0.75,
+                yanchor="middle",
+                y=0.5
+            )
         )
         st.plotly_chart(fig_scatter, config={"responsive": True}, use_container_width=True)
