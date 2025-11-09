@@ -60,6 +60,12 @@ with tab1:
             hover_name="country",
             color_continuous_scale="Viridis",
             range_color=[0, 1],
+            labels={
+                f"hdi_{year_map}": "HDI",
+                f"life_expectancy_index_{year_map}": "Life Expectancy Index",
+                f"education_index_{year_map}": "Education Index",
+                f"income_index_{year_map}": "Income Index",
+            },
         )
 
         if selection == "hdi":
@@ -107,7 +113,7 @@ with tab1:
         fig_map.update_traces(hovertemplate=hovertemplate, customdata=customdata)
 
         fig_map.update_layout(height=700)
-        st.plotly_chart(fig_map, config={"responsive": True}, use_container_width=True)
+        st.plotly_chart(fig_map, use_container_width=True)
 
 # ---------------------------
 # 2. RADAR PLOT
