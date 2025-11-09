@@ -48,10 +48,16 @@ with tab1:
             tuple(label_map.keys()),
             format_func=lambda x: label_map.get(x, x)
         )
+        regions = st.multiselect(
+            "Select Regions",
+            sorted(df["subregion"].unique()),
+            key="multiselect_map"
+        )
 
     with col2:
         hdi_col = f"{selection}_{year_map}"
         df_map = df.dropna(subset=[hdi_col]).reset_index(drop=True)
+        if regions: df_map = df_map[df_map["subregion"].isin(regions)]
 
         fig_map = px.choropleth(
             df_map,
