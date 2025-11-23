@@ -1,25 +1,17 @@
 # General
-- layout (G)
-- deploy: https://data-viz-hdi-component-explorer.streamlit.app/
+- add "about" boxes
 
-## Data (A)
-- add regions ✅
+## Data
 
-## Map view (G)
-- readable values ✅
-
+## Map view
+- remove region selector
 
 ## Radar plot (K)
-- readable values ✅
-- color scale ✅
-- limit entries ✅
-- show if missing HDI in table ✅
+- change scale, use raw values
 
 ## Line chart (G)
-- readable values ✅
-
+- use raw values
 
 ## Scatter plot (A)
-- readable values ✅
-- don't display NaN HDI ✅
-- select by region ✅
+- use raw values
+- distinguish regions
