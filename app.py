@@ -30,15 +30,43 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # ---------------------------
 # 1. MAP VIEW
 # ---------------------------
+
+# Compute global min/max per metric across ALL years so the scale doesn't change
+year_range = range(1990, 2024)  # 1990–2023 inclusive
+
+def global_min_max(prefix: str):
+    cols = [f"{prefix}_{y}" for y in year_range if f"{prefix}_{y}" in df.columns]
+    if not cols:
+        return (0.0, 1.0)
+    col_min = df[cols].min().min()
+    col_max = df[cols].max().max()
+    return float(col_min), float(col_max)
+
+# HDI is an index (0–1)
+hdi_min, hdi_max = 0.0, 1.0
+le_min, le_max = global_min_max("le")
+eys_min, eys_max = global_min_max("eys")
+mys_min, mys_max = global_min_max("mys")
+gnipc_min, gnipc_max = global_min_max("gnipc")
+
+range_color_map = {
+    "hdi":   [hdi_min,   hdi_max],
+    "le":    [le_min,    le_max],
+    "eys":   [eys_min,   eys_max],
+    "mys":   [mys_min,   mys_max],
+    "gnipc": [gnipc_min, gnipc_max],
+}
+
 with tab1:
     st.subheader("Global HDI Overview")
     col1, col2 = st.columns([1, 3])
 
     label_map = {
         "hdi": "HDI",
-        "life_expectancy_index": "Life Expectancy Index",
-        "education_index": "Education Index",
-        "income_index": "Income Index"
+        "le": "Life Expectancy",
+        "eys": "Expected Years of Schooling",
+        "mys": "Mean Years of Schooling",
+        "gnipc": "GNI per Capita",
     }
 
     with col1:
@@ -46,33 +74,41 @@ with tab1:
         selection = st.selectbox(
             "Select Component",
             tuple(label_map.keys()),
-            format_func=lambda x: label_map.get(x, x)
-        )
-        regions = st.multiselect(
-            "Select Regions",
-            sorted(df["subregion"].unique()),
-            key="multiselect_map"
+            format_func=lambda x: label_map.get(x, x),
         )
 
     with col2:
-        hdi_col = f"{selection}_{year_map}"
-        df_map = df.dropna(subset=[hdi_col]).reset_index(drop=True)
-        if regions: df_map = df_map[df_map["subregion"].isin(regions)]
+        # Map selection to the actual column (HDI index + raw values)
+        data_col_map = {
+            "hdi":   f"hdi_{year_map}",
+            "le":    f"le_{year_map}",
+            "eys":   f"eys_{year_map}",
+            "mys":   f"mys_{year_map}",
+            "gnipc": f"gnipc_{year_map}",  # <- uses gnipc_{}
+        }
+        value_col = data_col_map[selection]
+
+        df_map = df.dropna(subset=[value_col]).reset_index(drop=True)
+
+        labels = {
+            f"hdi_{year_map}": "HDI",
+            f"le_{year_map}": "Life Expectancy (years)",
+            f"eys_{year_map}": "Expected Years of Schooling",
+            f"mys_{year_map}": "Mean Years of Schooling",
+            f"gnipc_{year_map}": "GNI per Capita (USD)",
+        }
 
         fig_map = px.choropleth(
             df_map,
             locations="iso3",
-            color=hdi_col,
+            color=value_col,
             hover_name="country",
             color_continuous_scale="Viridis",
-            range_color=[0, 1],
-            labels={
-                f"hdi_{year_map}": "HDI",
-                f"life_expectancy_index_{year_map}": "Life Expectancy Index",
-                f"education_index_{year_map}": "Education Index",
-                f"income_index_{year_map}": "Income Index",
-            },
+            labels=labels,
+            range_color=range_color_map[selection],  # fixed per metric across years
         )
+
+        # --- Hover templates with raw values; HDI remains index ---
 
         if selection == "hdi":
             customdata = df_map[[f"hdi_{year_map}", "subregion"]]
@@ -82,44 +118,43 @@ with tab1:
                 "HDI: %{customdata[0]:.3f}<extra></extra>"
             )
 
-        elif selection == "life_expectancy_index":
-            customdata = df_map[
-                [f"life_expectancy_index_{year_map}", f"le_{year_map}", "subregion"]
-            ]
+        elif selection == "le":
+            customdata = df_map[[f"le_{year_map}", "subregion"]]
             hovertemplate = (
                 "<b>%{hovertext}</b><br>"
-                "<i>%{customdata[2]}</i><br><br>"
-                "Life Expectancy Index: %{customdata[0]:.3f}<br>"
-                "Life Expectancy: %{customdata[1]:.1f} years<extra></extra>"
+                "<i>%{customdata[1]}</i><br><br>"
+                "Life Expectancy: %{customdata[0]:.1f} years<extra></extra>"
             )
 
-        elif selection == "education_index":
-            customdata = df_map[
-                [f"education_index_{year_map}", f"mys_{year_map}", f"eys_{year_map}", "subregion"]
-            ]
+        elif selection == "eys":
+            customdata = df_map[[f"eys_{year_map}", "subregion"]]
             hovertemplate = (
                 "<b>%{hovertext}</b><br>"
-                "<i>%{customdata[3]}</i><br><br>"
-                "Education Index: %{customdata[0]:.3f}<br>"
-                "Mean Years of Schooling: %{customdata[1]:.1f}<br>"
-                "Expected Years of Schooling: %{customdata[2]:.1f}<extra></extra>"
+                "<i>%{customdata[1]}</i><br><br>"
+                "Expected Years of Schooling: %{customdata[0]:.1f}<extra></extra>"
             )
 
-        elif selection == "income_index":
-            customdata = df_map[
-                [f"income_index_{year_map}", f"gnipc_{year_map}", "subregion"]
-            ]
+        elif selection == "mys":
+            customdata = df_map[[f"mys_{year_map}", "subregion"]]
             hovertemplate = (
                 "<b>%{hovertext}</b><br>"
-                "<i>%{customdata[2]}</i><br><br>"
-                "Income Index: %{customdata[0]:.3f}<br>"
-                "GNI per capita: %{customdata[1]:.1f} USD<extra></extra>"
+                "<i>%{customdata[1]}</i><br><br>"
+                "Mean Years of Schooling: %{customdata[0]:.1f}<extra></extra>"
+            )
+
+        elif selection == "gnipc":
+            customdata = df_map[[f"gnipc_{year_map}", "subregion"]]
+            hovertemplate = (
+                "<b>%{hovertext}</b><br>"
+                "<i>%{customdata[1]}</i><br><br>"
+                "GNI per Capita: %{customdata[0]:,.0f} USD<extra></extra>"
             )
 
         fig_map.update_traces(hovertemplate=hovertemplate, customdata=customdata)
-
         fig_map.update_layout(height=700)
         st.plotly_chart(fig_map, use_container_width=True)
+
+
 
 # ---------------------------
 # 2. RADAR PLOT
