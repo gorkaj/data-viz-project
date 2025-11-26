@@ -20,11 +20,11 @@ st.set_page_config(
 # ---------------------------
 # Tabs layout
 # ---------------------------
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab4, tab2, tab3 = st.tabs([
     "🌐 Map View",
+    "🔍 Scatter Plot",
     "🕸️ Radar Plot",
-    "📈 Temporal Trends",
-    "🔍 Scatter Plot"
+    "📈 Temporal Trends"
 ])
 
 # ---------------------------
@@ -151,7 +151,7 @@ with tab1:
             )
 
         fig_map.update_traces(hovertemplate=hovertemplate, customdata=customdata)
-        fig_map.update_layout(height=700)
+        fig_map.update_layout(height=550)
         st.plotly_chart(fig_map, use_container_width=True)
 
 
@@ -257,8 +257,8 @@ with tab2:
         radar_fig.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 1.2])),
             showlegend=True,
-            width=800,
-            height=800,
+            width=550,
+            height=550,
         )
 
         st.plotly_chart(radar_fig, config={"responsive": True}, use_container_width=True)
@@ -392,107 +392,191 @@ with tab3:
             yaxis_title="Index (0–1)",
             yaxis_range=[0, 1.2],
             width=1000,
-            height=600
+            height=500
         )
         st.plotly_chart(line_fig, config={"responsive": True}, use_container_width=True)
+
 
 # ---------------------------
 # 4. SCATTER PLOT
 # ---------------------------
 with tab4:
-    st.subheader("Relationship Between HDI Components (Indices)")
+    st.subheader("Relationship Between HDI and Components (Raw Values)")
     col1, col2 = st.columns([1, 3])
 
     with col1:
-        year_scatter = st.slider("Select Year", 1990, 2023, 2023, key="scatter_slider")
-        x_axis = st.selectbox(
-            "X-axis",
-            ["life_expectancy_index", "education_index", "income_index"],
-            format_func=lambda x: {
-                "life_expectancy_index": "Life Expectancy Index",
-                "education_index": "Education Index",
-                "income_index": "Income Index"
-            }.get(x, x),
-            key="scatter_x"
+        year_scatter = st.slider(
+            "Select Year", 1990, 2023, 2023, key="scatter_slider"
         )
-        y_axis = st.selectbox(
-            "Y-axis",
-            ["life_expectancy_index", "education_index", "income_index"],
-            index=1,
+
+        # X-axis: raw value
+        value_axis = st.selectbox(
+            "X-axis (Raw Value)",
+            ["le", "mys", "eys", "gnipc"],
             format_func=lambda x: {
-                "life_expectancy_index": "Life Expectancy Index",
-                "education_index": "Education Index",
-                "income_index": "Income Index"
+                "le": "Life Expectancy (years)",
+                "mys": "Mean Years of Schooling",
+                "eys": "Expected Years of Schooling",
+                "gnipc": "GNI per Capita (USD)",
             }.get(x, x),
-            key="scatter_y"
+            key="scatter_value_x",
         )
+
         regions = st.multiselect(
-            "Select Regions",
+            "Highlight Regions",
             sorted(df["subregion"].unique()),
-            key="multiselect_scatter"
+            key="multiselect_scatter",
         )
 
     with col2:
-        df_scatter = df.dropna(subset=[f"hdi_{year_scatter}"]).reset_index(drop=True)
+        x_col = f"{value_axis}_{year_scatter}"
+        hdi_col = f"hdi_{year_scatter}"
 
-        fig_scatter = px.scatter(
-            df_scatter,
-            x=f"{x_axis}_{year_scatter}",
-            y=f"{y_axis}_{year_scatter}",
-            color=f"hdi_{year_scatter}",
-            hover_name="country",
-            color_continuous_scale="Viridis",
-            range_color=[0, 1],
-            labels={
-                f"hdi_{year_scatter}": "HDI",
-                f"life_expectancy_index_{year_scatter}": "Life Expectancy Index",
-                f"education_index_{year_scatter}": "Education Index",
-                f"income_index_{year_scatter}": "Income Index",
-            },
+        df_scatter = df.dropna(subset=[hdi_col, x_col]).reset_index(drop=True)
+
+        # Palette for regions
+        base_colors = px.colors.qualitative.Set2
+        region_palette = {}
+
+        def get_region_color(region_name):
+            """Assign a unique color per highlighted region"""
+            if region_name not in region_palette:
+                region_palette[region_name] = base_colors[len(region_palette) % len(base_colors)]
+            return region_palette[region_name]
+
+        hovertemplate = (
+            "<b>%{hovertext}</b><br>"
+            "<i>%{customdata[5]}</i><br><br>"
+            "HDI: %{customdata[0]:.3f}<br>"
+            "Life Expectancy: %{customdata[1]:.1f} years<br>"
+            "Mean Years of Schooling: %{customdata[2]:.1f} years<br>"
+            "Expected Years of Schooling: %{customdata[3]:.1f} years<br>"
+            "GNI per Capita: %{customdata[4]:,.0f} USD"
+            "<extra></extra>"
         )
 
-        fig_scatter.update_traces(
-            hovertemplate=(
-                "<b>%{hovertext}</b><br>"
-                f"<i>%{{customdata[5]}}</i><br><br>"
-                f"HDI: %{{customdata[0]:.3f}}<br>"
-                f"Life Expectancy: %{{customdata[1]:.1f}} y<br>"
-                f"Mean Years of Schooling: %{{customdata[2]:.1f}} y<br>"
-                f"Expected Years of Schooling: %{{customdata[3]:.1f}} y<br>"
-                f"GNI per capita: %{{customdata[4]:.1f}} USD<br>"
-                "<extra></extra>"
-            ),
-            customdata=df_scatter[
+        fig_scatter = go.Figure()
+
+        # ------------------------------------------------------------------
+        # CASE A — No regions selected → uniform color + NO legend
+        # ------------------------------------------------------------------
+        if not regions:
+            customdata = df_scatter[
                 [
-                    f"hdi_{year_scatter}",
+                    hdi_col,
                     f"le_{year_scatter}",
                     f"mys_{year_scatter}",
                     f"eys_{year_scatter}",
                     f"gnipc_{year_scatter}",
-                    f"subregion"
+                    "subregion",
                 ]
-            ],
-            marker=dict(size=8),
-        )
+            ].values
 
-        if regions:
-            mask = df_scatter["subregion"].isin(regions).tolist()
-            selected_idx = [i for i, ok in enumerate(mask) if ok] 
-            fig_scatter.update_traces(
-                selectedpoints=selected_idx,
-                selected=dict(marker=dict(opacity=1.0, size=9)),
-                unselected=dict(marker=dict(opacity=0.2, size=7)),
+            fig_scatter.add_trace(
+                go.Scatter(
+                    x=df_scatter[x_col],
+                    y=df_scatter[hdi_col],
+                    mode="markers",
+                    name="",  # no legend entry
+                    showlegend=False,
+                    marker=dict(
+                        size=8,
+                        color="#4c78a8",    # uniform blue color
+                        opacity=1.0,
+                    ),
+                    hovertext=df_scatter["country"],
+                    customdata=customdata,
+                    hovertemplate=hovertemplate,  # <-- hover for ALL countries
+                )
             )
+
+        # ------------------------------------------------------------------
+        # CASE B — Some regions selected → one trace per region + grey others
+        # ------------------------------------------------------------------
         else:
-            fig_scatter.update_traces(
-                selectedpoints=None,
-                selected=dict(marker=dict(opacity=1.0)),
-                unselected=dict(marker=dict(opacity=1.0)),
-            )
+            # Add highlighted regions (hover ON)
+            for region in regions:
+                sub_df = df_scatter[df_scatter["subregion"] == region]
+                if sub_df.empty:
+                    continue
+
+                color = get_region_color(region)
+                customdata = sub_df[
+                    [
+                        hdi_col,
+                        f"le_{year_scatter}",
+                        f"mys_{year_scatter}",
+                        f"eys_{year_scatter}",
+                        f"gnipc_{year_scatter}",
+                        "subregion",
+                    ]
+                ].values
+
+                fig_scatter.add_trace(
+                    go.Scatter(
+                        x=sub_df[x_col],
+                        y=sub_df[hdi_col],
+                        mode="markers",
+                        name=region,
+                        marker=dict(size=9, color=color, opacity=1.0),
+                        hovertext=sub_df["country"],
+                        customdata=customdata,
+                        hovertemplate=hovertemplate,  # <-- hover for SELECTED regions
+                    )
+                )
+
+            # Add all other regions as grey (hover OFF)
+            other_df = df_scatter[~df_scatter["subregion"].isin(regions)]
+            if not other_df.empty:
+                customdata_other = other_df[
+                    [
+                        hdi_col,
+                        f"le_{year_scatter}",
+                        f"mys_{year_scatter}",
+                        f"eys_{year_scatter}",
+                        f"gnipc_{year_scatter}",
+                        "subregion",
+                    ]
+                ].values
+
+                fig_scatter.add_trace(
+                    go.Scatter(
+                        x=other_df[x_col],
+                        y=other_df[hdi_col],
+                        mode="markers",
+                        name="Other regions",
+                        marker=dict(size=7, color="lightgrey", opacity=0.4),
+                        hovertext=other_df["country"],
+                        customdata=customdata_other,
+                        hovertemplate=None,   # ignore the template
+                        hoverinfo="skip",     # <-- disables hover for this trace
+                    )
+                )
+
+        # ------------------------------------------------------------------
+        # Layout
+        # ------------------------------------------------------------------
+        x_labels = {
+            "le": "Life Expectancy (years)",
+            "mys": "Mean Years of Schooling",
+            "eys": "Expected Years of Schooling",
+            "gnipc": "GNI per Capita (USD)",
+        }
+
         fig_scatter.update_layout(
             width=800,
-            height=800,
-            xaxis=dict(range=[0, 1.1]),
-            yaxis=dict(range=[0, 1.1])
+            height=500,
+            xaxis_title=x_labels[value_axis],
+            yaxis_title="HDI",
+            yaxis=dict(range=[0, 1.0]),
+            legend=dict(
+                title="Regions",
+                orientation="v",
+            ),
         )
-        st.plotly_chart(fig_scatter, config={"responsive": True}, use_container_width=True)
+
+        # Hide legend entirely when no regions selected
+        if not regions:
+            fig_scatter.update_layout(showlegend=False)
+
+        st.plotly_chart(fig_scatter, use_container_width=True)
