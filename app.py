@@ -401,7 +401,7 @@ with tab3:
 # 4. SCATTER PLOT
 # ---------------------------
 with tab4:
-    st.subheader("Relationship Between HDI and Components (Raw Values)")
+    st.subheader("Relationship Between HDI and Components")
     col1, col2 = st.columns([1, 3])
 
     with col1:
@@ -574,6 +574,8 @@ with tab4:
                 orientation="v",
             ),
         )
+
+        fig_scatter.update_xaxes(type="log")
 
         # Hide legend entirely when no regions selected
         if not regions:
