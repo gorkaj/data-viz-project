@@ -160,16 +160,24 @@ with tab1:
 # 2. RADAR PLOT
 # ---------------------------
 with tab2:
-    st.subheader("Component Comparison")
+    st.subheader("Component Comparison (Normalized Values)")
     col1, col2 = st.columns([1, 3])
 
+    global_ranges = {
+        "Life Expectancy": (le_min, le_max),
+        "Expected Years of Schooling": (eys_min, eys_max),
+        "Mean Years of Schooling": (mys_min, mys_max),
+        "GNI per Capita": (gnipc_min, gnipc_max),
+    }
+
+    categories = list(global_ranges.keys())
+
     with col1:
-        year_radar = st.slider("Select Year", 1990, 2023, 2023, key="radar_slider")
+        year_radar = st.slider("Select Year", 1990, 2023, 2023)
         countries_radar = st.multiselect(
             "Select Countries",
             sorted(df["country"].unique()),
-            key="radar_countries",
-            max_selections=5
+            max_selections=5,
         )
 
         if countries_radar:
@@ -196,72 +204,71 @@ with tab2:
             st.dataframe(hdi_table, hide_index=True, width="stretch")
 
             countries_radar = countries_radar_valid
-        else:
-            hdi_values = []
 
     with col2:
-        categories = ["Life Expectancy Index", "Education Index", "Income Index"]
         radar_fig = go.Figure()
+        color_palette = ["#008c5c", "#002f64", "#9b54f3", "#f98517", "#561e01"]
 
-        if countries_radar:
-            color_palette = ["#008c5c", "#002f64", "#9b54f3", "#f98517", "#561e01"]
+        for i, country in enumerate(countries_radar):
+            row = df[df["country"] == country].iloc[0]
+            subregion = row.get("subregion", "Unknown")
 
-            for i, country in enumerate(countries_radar):
-                row = df[df["country"] == country].iloc[0]
+            le = row.get(f"le_{year_radar}", None)
+            eys = row.get(f"eys_{year_radar}", None)
+            mys = row.get(f"mys_{year_radar}", None)
+            gnipc = row.get(f"gnipc_{year_radar}", None)
 
-                le_index = row[f"life_expectancy_index_{year_radar}"]
-                edu_index = row[f"education_index_{year_radar}"]
-                inc_index = row[f"income_index_{year_radar}"]
-                values = [le_index, edu_index, inc_index, le_index]
-                theta = categories + [categories[0]]
+            raw_values = {
+                "Life Expectancy": le,
+                "Expected Years of Schooling": eys,
+                "Mean Years of Schooling": mys,
+                "GNI per Capita": gnipc,
+            }
 
-                le = row.get(f"le_{year_radar}", None)
-                mys = row.get(f"mys_{year_radar}", None)
-                eys = row.get(f"eys_{year_radar}", None)
-                gnipc = row.get(f"gnipc_{year_radar}", None)
-                subregion = row.get("subregion", "Unknown")
+            norm_values = []
+            hover_texts = []
 
-                hover_texts = [
-                    f"<b>{country}</b><br><i>{subregion}</i><br><br>"
-                    f"Life Expectancy Index: {le_index:.3f}<br>"
-                    f"Life Expectancy: {le:.1f} years",
+            for comp, raw in raw_values.items():
+                gmin, gmax = global_ranges[comp]
+                norm = (raw - gmin) / (gmax - gmin) if raw is not None else 0
+                norm_values.append(norm)
 
-                    f"<b>{country}</b><br><i>{subregion}</i><br><br>"
-                    f"Education Index: {edu_index:.3f}<br>"
-                    f"Mean Years of Schooling: {mys:.1f} years<br>"
-                    f"Expected Years of Schooling: {eys:.1f} years",
+                if comp == "GNI per Capita":
+                    hover_texts.append(
+                        f"<b>{country}</b><br><i>{subregion}</i><br><br>"
+                        f"{comp}: {raw:,.0f} USD"
+                    )
+                else:
+                    hover_texts.append(
+                        f"<b>{country}</b><br><i>{subregion}</i><br><br>"
+                        f"{comp}: {raw:.1f}"
+                    )
 
-                    f"<b>{country}</b><br><i>{subregion}</i><br><br>"
-                    f"Income Index: {inc_index:.3f}<br>"
-                    f"GNI per capita: {gnipc:.1f} USD",
+            norm_values.append(norm_values[0])
+            theta = categories + [categories[0]]
+            hover_texts.append(hover_texts[0])
 
-                    # Repeat the first for closure of the polygon
-                    f"<b>{country}</b><br><i>{subregion}</i><br><br>"
-                    f"Life Expectancy Index: {le_index:.3f}<br>"
-                    f"Life Expectancy: {le:.1f} years<br>",
-                ]
-
-                color = color_palette[i % len(color_palette)]
-
-                radar_fig.add_trace(go.Scatterpolar(
-                    r=values,
+            radar_fig.add_trace(
+                go.Scatterpolar(
+                    r=norm_values,
                     theta=theta,
                     text=hover_texts,
                     hoverinfo="text",
                     fill=None,
                     name=country,
-                    line_color=color,
+                    line_color=color_palette[i % len(color_palette)],
                     line_width=3,
-                ))
+                )
+            )
 
         radar_fig.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 1.2])),
+            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
             showlegend=True,
-            width=550,
-            height=550,
+            width=700,
+            height=700,
         )
 
-        st.plotly_chart(radar_fig, config={"responsive": True}, use_container_width=True)
+        st.plotly_chart(radar_fig, use_container_width=True)
 
 # ---------------------------
 # 3. TEMPORAL TRENDS

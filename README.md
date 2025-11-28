@@ -11,7 +11,7 @@
 - change scale, use raw values
 
 ## Line chart (G)
-- use raw values
+- use raw values ✅
 
 ## Scatter plot (A)
 - use raw values
