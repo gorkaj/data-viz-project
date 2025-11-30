@@ -9,7 +9,7 @@
 - idea: on click open radar tab with the country
 
 ## Scatter plot (A)
-- log scale only for GDI
+- log scale only for GDI 
 - leave only relevant factor in hover 
 - idea: on click open radar tab with the country
 

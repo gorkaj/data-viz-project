@@ -468,7 +468,7 @@ with tab4:
             "Select Year", 1990, 2023, 2023, key="scatter_slider"
         )
 
-        # X-axis: raw value
+        # X-axis
         value_axis = st.selectbox(
             "X-axis (Raw Value)",
             ["le", "mys", "eys", "gnipc"],
@@ -502,17 +502,35 @@ with tab4:
             if region_name not in region_palette:
                 region_palette[region_name] = base_colors[len(region_palette) % len(base_colors)]
             return region_palette[region_name]
-
-        hovertemplate = (
-            "<b>%{hovertext}</b><br>"
-            "<i>%{customdata[5]}</i><br><br>"
-            "HDI: %{customdata[0]:.3f}<br>"
-            "Life Expectancy: %{customdata[1]:.1f} years<br>"
-            "Mean Years of Schooling: %{customdata[2]:.1f} years<br>"
-            "Expected Years of Schooling: %{customdata[3]:.1f} years<br>"
-            "GNI per Capita: %{customdata[4]:,.0f} USD"
-            "<extra></extra>"
-        )
+        
+        if value_axis == "le":
+            hovertemplate = (
+                "<b>%{hovertext}</b><br>"
+                "<i>%{customdata[5]}</i><br><br>"
+                "Life Expectancy: %{customdata[1]:.1f} years<br>"
+                "<extra></extra>"
+            )
+        elif value_axis == "mys":
+            hovertemplate = (
+                "<b>%{hovertext}</b><br>"
+                "<i>%{customdata[5]}</i><br><br>"
+                "Mean Years of Schooling: %{customdata[2]:.1f} years<br>"
+                "<extra></extra>"
+            )
+        elif value_axis == "eys":
+            hovertemplate = (
+                "<b>%{hovertext}</b><br>"
+                "<i>%{customdata[5]}</i><br><br>"
+                "Expected Years of Schooling: %{customdata[3]:.1f} years<br>"
+                "<extra></extra>"
+            )
+        elif value_axis == "gnipc":
+            hovertemplate = (
+                "<b>%{hovertext}</b><br>"
+                "<i>%{customdata[5]}</i><br><br>"
+                "GNI per Capita: %{customdata[4]:,.0f} USD"
+                "<extra></extra>"
+            )
 
         fig_scatter = go.Figure()
 
@@ -545,7 +563,7 @@ with tab4:
                     ),
                     hovertext=df_scatter["country"],
                     customdata=customdata,
-                    hovertemplate=hovertemplate,  # <-- hover for ALL countries
+                    hovertemplate=hovertemplate,
                 )
             )
 
@@ -580,7 +598,7 @@ with tab4:
                         marker=dict(size=9, color=color, opacity=1.0),
                         hovertext=sub_df["country"],
                         customdata=customdata,
-                        hovertemplate=hovertemplate,  # <-- hover for SELECTED regions
+                        hovertemplate=hovertemplate,
                     )
                 )
 
@@ -607,8 +625,8 @@ with tab4:
                         marker=dict(size=7, color="lightgrey", opacity=0.4),
                         hovertext=other_df["country"],
                         customdata=customdata_other,
-                        hovertemplate=None,   # ignore the template
-                        hoverinfo="skip",     # <-- disables hover for this trace
+                        hovertemplate=None,
+                        hoverinfo="skip", 
                     )
                 )
 
@@ -633,8 +651,11 @@ with tab4:
                 orientation="v",
             ),
         )
-
-        # fig_scatter.update_xaxes(type="log")
+        if value_axis == "gnipc":
+            fig_scatter.update_xaxes(type="log")
+            
+        else:
+            fig_scatter.update_xaxes(type="linear")
 
         # Hide legend entirely when no regions selected
         if not regions:
