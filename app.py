@@ -22,9 +22,9 @@ st.set_page_config(
 # Tabs layout
 # ---------------------------
 tab1, tab4, tab2, tab3 = st.tabs([
-    "🌐 Map View",
-    "🔍 Scatter Plot",
-    "🕸️ Radar Plot",
+    "🌐 Global HDI Overview",
+    "🔍 Regional Comparison",
+    "🕸️ Component Comparison",
     "📈 Temporal Trends"
 ])
 
@@ -161,7 +161,7 @@ with tab1:
 # 2. RADAR PLOT
 # ---------------------------
 with tab2:
-    st.subheader("Component Comparison (Normalized Values)")
+    st.subheader("HDI Components Comparison by Country")
     col1, col2 = st.columns([1, 3])
 
     global_ranges = {
@@ -265,8 +265,8 @@ with tab2:
         radar_fig.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
             showlegend=True,
-            width=700,
-            height=700,
+            width=550,
+            height=550,
         )
 
         st.plotly_chart(radar_fig, use_container_width=True)
@@ -460,7 +460,7 @@ with tab3:
 # 4. SCATTER PLOT
 # ---------------------------
 with tab4:
-    st.subheader("Relationship Between HDI and Components")
+    st.subheader("Regional Comparison by Components")
     col1, col2 = st.columns([1, 3])
 
     with col1:
@@ -634,7 +634,7 @@ with tab4:
             ),
         )
 
-        fig_scatter.update_xaxes(type="log")
+        # fig_scatter.update_xaxes(type="log")
 
         # Hide legend entirely when no regions selected
         if not regions:
