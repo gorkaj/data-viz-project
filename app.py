@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+import numpy as np
 
 # ---------------------------
 # Load data
@@ -274,33 +275,39 @@ with tab2:
 # 3. TEMPORAL TRENDS
 # ---------------------------
 with tab3:
-    st.subheader("Temporal Trends of HDI Components (Indices)")
+    st.subheader("Temporal Trends of HDI Components")
     col1, col2 = st.columns([1, 3])
 
     base_hues = {
-        "Life Expectancy Index": 165,  # teal
-        "Education Index": 25,  # orange
-        "Income Index": 254,  # purple
+        "Life Expectancy (years)": 160,  # green-teal
+        "Mean Years of Schooling": 30,  # orange
+        "Expected Years of Schooling": 260,  # violet-blue
+        "GNI per Capita (USD)": 320,  # magenta-pink
+        "HDI": 0  # grey 
     }
-    sat = 70  # saturation
-    luminance_steps = [45, 75]  # darker for 1st country, lighter for 2nd
 
+    sat = 60
+    luminance_steps = [45, 70]
 
     def color_for(component_label: str, country_idx: int) -> str:
         lum = luminance_steps[country_idx % len(luminance_steps)]
         if component_label == "HDI":
-            # grey, no hue
             return f"hsl(0, 0%, {lum}%)"
-        else:
-            hue = base_hues[component_label]
-            return f"hsl({hue}, {sat}%, {lum}%)"
+        hue = base_hues[component_label]
+        return f"hsl({hue}, {sat}%, {lum}%)"
 
+    def normalize(series):
+        import numpy as np
+        arr = np.array(series, dtype=float)
+        finite = arr[np.isfinite(arr)]
+        if len(finite) == 0 or np.nanmax(finite) == np.nanmin(finite):
+            return arr
+        return (arr - np.nanmin(finite)) / (np.nanmax(finite) - np.nanmin(finite))
 
     with col1:
         countries_line = st.multiselect(
             "Select Countries",
             sorted(df["country"].unique()),
-            # default=["Norway"],
             key="line_countries",
             max_selections=2
         )
@@ -314,63 +321,38 @@ with tab3:
             subregion = row.get("subregion", "Unknown")
 
             for comp, label in zip(
-                    ["life_expectancy_index", "education_index", "income_index"],
-                    ["Life Expectancy Index", "Education Index", "Income Index"]
+                    ["le", "mys", "eys", "gnipc"],
+                    ["Life Expectancy (years)", "Mean Years of Schooling", "Expected Years of Schooling", "GNI per Capita (USD)"]
             ):
-                vals = [
+                raw_vals = [
                     df.loc[df["country"] == country, f"{comp}_{y}"].values[0]
                     if f"{comp}_{y}" in df.columns else None
                     for y in years_range
                 ]
+                vals = normalize(raw_vals)
+                actuals = raw_vals
 
-                if comp == "life_expectancy_index":
-                    actuals = [
-                        df.loc[df["country"] == country, f"le_{y}"].values[0]
-                        if f"le_{y}" in df.columns else None
-                        for y in years_range
-                    ]
+                if comp == "le":
                     hovertext = "Life Expectancy: %{customdata:.1f} years"
-                elif comp == "education_index":
-                    mys = [
-                        df.loc[df["country"] == country, f"mys_{y}"].values[0]
-                        if f"mys_{y}" in df.columns else None
-                        for y in years_range
-                    ]
-                    eys = [
-                        df.loc[df["country"] == country, f"eys_{y}"].values[0]
-                        if f"eys_{y}" in df.columns else None
-                        for y in years_range
-                    ]
-                    actuals = list(zip(mys, eys))
-                    hovertext = (
-                        "Mean Years of Schooling: %{customdata[0]:.1f}<br>"
-                        "Expected Years of Schooling: %{customdata[1]:.1f}"
-                    )
+                elif comp == "mys":
+                    hovertext = "Mean Years of Schooling: %{customdata:.1f}"
+                elif comp == "eys":
+                    hovertext = "Expected Years of Schooling: %{customdata:.1f}"
                 else:
-                    actuals = [
-                        df.loc[df["country"] == country, f"gnipc_{y}"].values[0]
-                        if f"gnipc_{y}" in df.columns else None
-                        for y in years_range
-                    ]
-                    hovertext = "GNI per capita: %{customdata:.1f} USD"
+                    hovertext = "GNI per Capita: %{customdata:,.0f} USD"
 
                 line_fig.add_trace(go.Scatter(
                     x=years_range,
                     y=vals,
                     mode="lines",
                     name=f"{country} - {label}",
-                    legendgroup=label,  # legend grouped by component
+                    legendgroup=label,
                     line=dict(color=color_for(label, c_idx), width=2),
                     customdata=actuals,
                     text=[country] * len(years_range),
-                    hovertemplate=(
-                            "<b>%{text}</b><br><i>" + subregion + "</i><br><br>"
-                            "Year: %{x}<br>" + hovertext + "<br>"
-                            + label + ": %{y:.3f}<extra></extra>"
-                    )
+                    hovertemplate=hovertext + "<extra></extra>"
                 ))
 
-            # HDI plotting
             hdi_cols = [f"hdi_{y}" for y in years_range]
             if any(col in df.columns for col in hdi_cols):
                 hdi_vals = [
@@ -390,17 +372,18 @@ with tab3:
                         dash="dash"
                     ),
                     text=[country] * len(years_range),
-                    hovertemplate="<b>%{text}</b><br><i>" + subregion + "</i><br><br>"
-                                  "Year: %{x}<br>HDI: %{y:.3f}<extra></extra>"
+                    hovertemplate="HDI: %{y:.3f}<extra></extra>"
                 ))
 
         line_fig.update_layout(
             xaxis_title="Year",
-            yaxis_title="Index (0–1)",
-            yaxis_range=[0, 1.2],
+            yaxis_title="Standardized value",
             width=1000,
-            height=500
+            height=500,
+            yaxis=dict(range=[0, 1.05]),
+            legend_title="Indicators"
         )
+
         st.plotly_chart(line_fig, config={"responsive": True}, use_container_width=True)
 
 
