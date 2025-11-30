@@ -278,110 +278,179 @@ with tab3:
     st.subheader("Temporal Trends of HDI Components")
     col1, col2 = st.columns([1, 3])
 
-    base_hues = {
-        "Life Expectancy (years)": 160,  # green-teal
-        "Mean Years of Schooling": 30,  # orange
-        "Expected Years of Schooling": 260,  # violet-blue
-        "GNI per Capita (USD)": 320,  # magenta-pink
-        "HDI": 0  # grey 
-    }
+    # base_hues = {
+    #     "Life Expectancy (years)": 160,  # green-teal
+    #     "Mean Years of Schooling": 30,  # orange
+    #     "Expected Years of Schooling": 260,  # violet-blue
+    #     "GNI per Capita (USD)": 320,  # magenta-pink
+    #     "HDI": 0  # grey
+    # }
 
-    sat = 60
-    luminance_steps = [45, 70]
+    # sat = 60
+    # luminance_steps = [45, 70]
+    #
+    # def color_for(component_label: str, country_idx: int) -> str:
+    #     lum = luminance_steps[country_idx % len(luminance_steps)]
+    #     if component_label == "HDI":
+    #         return f"hsl(0, 0%, {lum}%)"
+    #     hue = base_hues[component_label]
+    #     return f"hsl({hue}, {sat}%, {lum}%)"
+    #
+    # def normalize(series):
+    #     import numpy as np
+    #     arr = np.array(series, dtype=float)
+    #     finite = arr[np.isfinite(arr)]
+    #     if len(finite) == 0 or np.nanmax(finite) == np.nanmin(finite):
+    #         return arr
+    #     return (arr - np.nanmin(finite)) / (np.nanmax(finite) - np.nanmin(finite))
 
-    def color_for(component_label: str, country_idx: int) -> str:
-        lum = luminance_steps[country_idx % len(luminance_steps)]
-        if component_label == "HDI":
-            return f"hsl(0, 0%, {lum}%)"
-        hue = base_hues[component_label]
-        return f"hsl({hue}, {sat}%, {lum}%)"
-
-    def normalize(series):
-        import numpy as np
-        arr = np.array(series, dtype=float)
-        finite = arr[np.isfinite(arr)]
-        if len(finite) == 0 or np.nanmax(finite) == np.nanmin(finite):
-            return arr
-        return (arr - np.nanmin(finite)) / (np.nanmax(finite) - np.nanmin(finite))
+    color_palette = ["#008c5c", "#002f64", "#9b54f3", "#f98517", "#561e01"]
 
     with col1:
+        component = st.selectbox(
+            "Select Component",
+            ["HDI", "Life Expectancy (years)", "Mean Years of Schooling",
+             "Expected Years of Schooling", "GNI per Capita (USD)"],
+            index=0,
+            key="temporal_component"
+        )
+
         countries_line = st.multiselect(
             "Select Countries",
             sorted(df["country"].unique()),
-            key="line_countries",
-            max_selections=2
+            # key="line_countries",
+            # max_selections=2
+            max_selections=5,
+            key="temporal_countries"
         )
+
+    # with col2:
+    #     years_range = list(range(1990, 2024))
+    #     line_fig = go.Figure()
+    #
+    #     for c_idx, country in enumerate(countries_line):
+    #         row = df[df["country"] == country].iloc[0]
+    #         subregion = row.get("subregion", "Unknown")
+    #
+    #         for comp, label in zip(
+    #                 ["le", "mys", "eys", "gnipc"],
+    #                 ["Life Expectancy (years)", "Mean Years of Schooling", "Expected Years of Schooling", "GNI per Capita (USD)"]
+    #         ):
+    #             raw_vals = [
+    #                 df.loc[df["country"] == country, f"{comp}_{y}"].values[0]
+    #                 if f"{comp}_{y}" in df.columns else None
+    #                 for y in years_range
+    #             ]
+    #             vals = normalize(raw_vals)
+    #             actuals = raw_vals
+    #
+    #             if comp == "le":
+    #                 hovertext = "Life Expectancy: %{customdata:.1f} years"
+    #             elif comp == "mys":
+    #                 hovertext = "Mean Years of Schooling: %{customdata:.1f}"
+    #             elif comp == "eys":
+    #                 hovertext = "Expected Years of Schooling: %{customdata:.1f}"
+    #             else:
+    #                 hovertext = "GNI per Capita: %{customdata:,.0f} USD"
+    #
+    #             line_fig.add_trace(go.Scatter(
+    #                 x=years_range,
+    #                 y=vals,
+    #                 mode="lines",
+    #                 name=f"{country} - {label}",
+    #                 legendgroup=label,
+    #                 line=dict(color=color_for(label, c_idx), width=2),
+    #                 customdata=actuals,
+    #                 text=[country] * len(years_range),
+    #                 hovertemplate=hovertext + "<extra></extra>"
+    #             ))
+    #
+    #         hdi_cols = [f"hdi_{y}" for y in years_range]
+    #         if any(col in df.columns for col in hdi_cols):
+    #             hdi_vals = [
+    #                 df.loc[df["country"] == country, f"hdi_{y}"].values[0]
+    #                 if f"hdi_{y}" in df.columns else None
+    #                 for y in years_range
+    #             ]
+    #             line_fig.add_trace(go.Scatter(
+    #                 x=years_range,
+    #                 y=hdi_vals,
+    #                 mode="lines",
+    #                 name=f"{country} - HDI",
+    #                 legendgroup="HDI",
+    #                 line=dict(
+    #                     color=color_for("HDI", c_idx),
+    #                     width=2,
+    #                     dash="dash"
+    #                 ),
+    #                 text=[country] * len(years_range),
+    #                 hovertemplate="HDI: %{y:.3f}<extra></extra>"
+    #             ))
+    #
+    #     line_fig.update_layout(
+    #         xaxis_title="Year",
+    #         yaxis_title="Standardized value",
+    #         width=1000,
+    #         height=500,
+    #         yaxis=dict(range=[0, 1.05]),
+    #         legend_title="Indicators"
+    #     )
 
     with col2:
         years_range = list(range(1990, 2024))
         line_fig = go.Figure()
 
-        for c_idx, country in enumerate(countries_line):
-            row = df[df["country"] == country].iloc[0]
-            subregion = row.get("subregion", "Unknown")
+        prefix_map = {
+            "HDI": "hdi",
+            "Life Expectancy (years)": "le",
+            "Mean Years of Schooling": "mys",
+            "Expected Years of Schooling": "eys",
+            "GNI per Capita (USD)": "gnipc"
+        }
 
-            for comp, label in zip(
-                    ["le", "mys", "eys", "gnipc"],
-                    ["Life Expectancy (years)", "Mean Years of Schooling", "Expected Years of Schooling", "GNI per Capita (USD)"]
-            ):
-                raw_vals = [
-                    df.loc[df["country"] == country, f"{comp}_{y}"].values[0]
-                    if f"{comp}_{y}" in df.columns else None
-                    for y in years_range
-                ]
-                vals = normalize(raw_vals)
-                actuals = raw_vals
+        prefix = prefix_map[component]
 
-                if comp == "le":
-                    hovertext = "Life Expectancy: %{customdata:.1f} years"
-                elif comp == "mys":
-                    hovertext = "Mean Years of Schooling: %{customdata:.1f}"
-                elif comp == "eys":
-                    hovertext = "Expected Years of Schooling: %{customdata:.1f}"
-                else:
-                    hovertext = "GNI per Capita: %{customdata:,.0f} USD"
+        for i, country in enumerate(countries_line):
+            vals = [
+                df.loc[df["country"] == country, f"{prefix}_{y}"].values[0]
+                if f"{prefix}_{y}" in df.columns else None
+                for y in years_range
+            ]
 
-                line_fig.add_trace(go.Scatter(
-                    x=years_range,
-                    y=vals,
-                    mode="lines",
-                    name=f"{country} - {label}",
-                    legendgroup=label,
-                    line=dict(color=color_for(label, c_idx), width=2),
-                    customdata=actuals,
-                    text=[country] * len(years_range),
-                    hovertemplate=hovertext + "<extra></extra>"
-                ))
+            if component == "HDI":
+                hovertext = "HDI: %{y:.3f}"
+            elif component == "Life Expectancy (years)":
+                hovertext = "Life Expectancy: %{y:.1f} years"
+            elif component == "Mean Years of Schooling":
+                hovertext = "Mean Years of Schooling: %{y:.1f}"
+            elif component == "Expected Years of Schooling":
+                hovertext = "Expected Years of Schooling: %{y:.1f}"
+            else:
+                hovertext = "GNI per Capita: %{y:,.0f} USD"
 
-            hdi_cols = [f"hdi_{y}" for y in years_range]
-            if any(col in df.columns for col in hdi_cols):
-                hdi_vals = [
-                    df.loc[df["country"] == country, f"hdi_{y}"].values[0]
-                    if f"hdi_{y}" in df.columns else None
-                    for y in years_range
-                ]
-                line_fig.add_trace(go.Scatter(
-                    x=years_range,
-                    y=hdi_vals,
-                    mode="lines",
-                    name=f"{country} - HDI",
-                    legendgroup="HDI",
-                    line=dict(
-                        color=color_for("HDI", c_idx),
-                        width=2,
-                        dash="dash"
-                    ),
-                    text=[country] * len(years_range),
-                    hovertemplate="HDI: %{y:.3f}<extra></extra>"
-                ))
+            line_fig.add_trace(go.Scatter(
+                x=years_range,
+                y=vals,
+                mode="lines",
+                name=country,
+                line=dict(color=color_palette[i % len(color_palette)], width=3),
+                hovertemplate=hovertext + "<extra></extra>"
+            ))
+
+        yaxis_title = {
+            "HDI": "Index (0–1)",
+            "Life Expectancy (years)": "Life Expectancy",
+            "Mean Years of Schooling": "Years of Schooling",
+            "Expected Years of Schooling": "Years of Schooling",
+            "GNI per Capita (USD)": "GNI per Capita"
+        }[component]
 
         line_fig.update_layout(
             xaxis_title="Year",
-            yaxis_title="Standardized value",
+            yaxis_title=yaxis_title,
             width=1000,
             height=500,
-            yaxis=dict(range=[0, 1.05]),
-            legend_title="Indicators"
+            legend_title="Countries",
         )
 
         st.plotly_chart(line_fig, config={"responsive": True}, use_container_width=True)
