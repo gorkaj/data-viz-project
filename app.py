@@ -13,10 +13,51 @@ def load_data():
 
 df = load_data()
 
+# --- Info ---
+hdi_calculation_info = """
+### Human Development Index (HDI) Calculation
+
+The HDI is a composite index measuring average achievement in three basic dimensions of human development: **life expectancy, education and per capita income.**
+
+The HDI is the **geometric mean** of normalized indices for each of the three dimensions:
+
+$$
+HDI = \\sqrt[3]{I_{LE} \\cdot I_{ED} \\cdot I_{IN}}
+$$
+
+#### 1. Life Expectancy Index ($I_{LE}$)
+Based on **life expectancy at birth (LE)**.
+$$
+I_{LE} = \\frac{LE - 20}{65}
+$$
+
+#### 2. Education Index ($I_{ED}$)
+Based on **mean years of schooling (MYS) and expected years of schooling (EYS)**.
+$$
+I_{ED} = \\frac{\\frac{MYS}{15} + \\frac{EYS}{18}}{2}
+$$
+
+#### 3. Income Index ($I_{IN}$)
+Based on **gross national income per capita (GNIpc)** (USD).
+$$
+I_{IN} = \\frac{\\ln(GNIpc) - \\ln(100)}{\\ln(750)}
+$$
+"""
+# ---------------------------
+
 st.set_page_config(
     page_title="HDI Components Explorer",
     page_icon="🌍",
     layout="wide")
+
+if 'selected_countries' not in st.session_state:
+    st.session_state.selected_countries = []
+if 'sync_key_counter' not in st.session_state:
+    st.session_state.sync_key_counter = 0
+
+def update_selected_countries(key):
+    st.session_state.selected_countries = st.session_state[key]
+    st.session_state.sync_key_counter += 1
 
 # ---------------------------
 # Tabs layout
@@ -77,6 +118,9 @@ with tab1:
             tuple(label_map.keys()),
             format_func=lambda x: label_map.get(x, x),
         )
+
+        with st.expander("❓ How is HDI Calculated?"):
+            st.markdown(hdi_calculation_info)
 
     with col2:
         # Map selection to the actual column (HDI index + raw values)
@@ -179,7 +223,12 @@ with tab2:
             "Select Countries",
             sorted(df["country"].unique()),
             max_selections=5,
+            default=st.session_state.selected_countries,
+            key=f"country_filter_radar_{st.session_state.sync_key_counter}",
+            on_change=update_selected_countries,
+            args=(f"country_filter_radar_{st.session_state.sync_key_counter}",)
         )
+
 
         if countries_radar:
             hdi_values = []
@@ -208,7 +257,7 @@ with tab2:
 
     with col2:
         radar_fig = go.Figure()
-        color_palette = ["#008c5c", "#002f64", "#9b54f3", "#f98517", "#561e01"]
+        color_palette = px.colors.qualitative.Set2
 
         for i, country in enumerate(countries_radar):
             row = df[df["country"] == country].iloc[0]
@@ -318,10 +367,12 @@ with tab3:
         countries_line = st.multiselect(
             "Select Countries",
             sorted(df["country"].unique()),
-            # key="line_countries",
-            # max_selections=2
             max_selections=5,
-            key="temporal_countries"
+            default=st.session_state.selected_countries,
+            key=f"country_filter_temporal_{st.session_state.sync_key_counter}",
+            # Pass the key to the callback function
+            on_change=update_selected_countries,
+            args=(f"country_filter_temporal_{st.session_state.sync_key_counter}",)
         )
 
     # with col2:
@@ -502,7 +553,7 @@ with tab4:
             if region_name not in region_palette:
                 region_palette[region_name] = base_colors[len(region_palette) % len(base_colors)]
             return region_palette[region_name]
-        
+
         if value_axis == "le":
             hovertemplate = (
                 "<b>%{hovertext}</b><br>"
@@ -626,7 +677,7 @@ with tab4:
                         hovertext=other_df["country"],
                         customdata=customdata_other,
                         hovertemplate=None,
-                        hoverinfo="skip", 
+                        hoverinfo="skip",
                     )
                 )
 
@@ -653,7 +704,7 @@ with tab4:
         )
         if value_axis == "gnipc":
             fig_scatter.update_xaxes(type="log")
-            
+
         else:
             fig_scatter.update_xaxes(type="linear")
 
