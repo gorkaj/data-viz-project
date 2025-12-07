@@ -658,6 +658,11 @@ with tab4:
             "eys": "Expected Years of Schooling",
             "gnipc": "GNI per Capita (USD)",
         }
+        # calculate max x-value
+        x_range = None
+        if value_axis != "gnipc":
+            max_x_value = df_scatter[x_col].max()
+            x_range = [0, max_x_value * 1.05]
 
         fig_scatter.update_layout(
             width=800,
@@ -672,9 +677,9 @@ with tab4:
         )
         if value_axis == "gnipc":
             fig_scatter.update_xaxes(type="log")
-
         else:
-            fig_scatter.update_xaxes(type="linear")
+            # fig_scatter.update_xaxes(type="linear")
+            fig_scatter.update_xaxes(type="linear", range=x_range)
 
         # Hide legend entirely when no regions selected
         if not regions:
