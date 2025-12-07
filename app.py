@@ -196,7 +196,7 @@ with tab1:
             hovertemplate = (
                 "<b>%{hovertext}</b><br>"
                 "<i>%{customdata[1]}</i><br><br>"
-                "Expected Years of Schooling: %{customdata[0]:.1f}<extra></extra>"
+                "Expected Years of Schooling: %{customdata[0]:.1f} years<extra></extra>"
             )
 
         elif selection == "mys":
@@ -204,7 +204,7 @@ with tab1:
             hovertemplate = (
                 "<b>%{hovertext}</b><br>"
                 "<i>%{customdata[1]}</i><br><br>"
-                "Mean Years of Schooling: %{customdata[0]:.1f}<extra></extra>"
+                "Mean Years of Schooling: %{customdata[0]:.1f} years<extra></extra>"
             )
 
         elif selection == "gnipc":
@@ -225,7 +225,7 @@ with tab1:
 # 2. RADAR PLOT
 # ---------------------------
 with tab2:
-    st.subheader("HDI Components Comparison by Country")
+    st.subheader("HDI Components Comparison by Country (Normalized to Global Maximum)")
     col1, col2 = st.columns([1, 3])
 
     global_ranges = {
@@ -311,7 +311,7 @@ with tab2:
                 else:
                     hover_texts.append(
                         f"<b>{country}</b><br><i>{subregion}</i><br><br>"
-                        f"{comp}: {raw:.1f}"
+                        f"{comp}: {raw:.1f} years"
                     )
 
             norm_values.append(norm_values[0])
@@ -416,14 +416,14 @@ with tab3:
                     "<b>%{hovertext}</b><br>"
                     "<i>%{customdata[0]}</i><br><br>"
                     "Year: %{x}<br>"
-                    "Mean Years of Schooling: %{y:.1f}<extra></extra>"
+                    "Mean Years of Schooling: %{y:.1f} years<extra></extra>"
                 )
             elif component == "Expected Years of Schooling":
                 hovertext_template = (
                     "<b>%{hovertext}</b><br>"
                     "<i>%{customdata[0]}</i><br><br>"
                     "Year: %{x}<br>"
-                    "Expected Years of Schooling: %{y:.1f}<extra></extra>"
+                    "Expected Years of Schooling: %{y:.1f} years<extra></extra>"
                 )
             else:  # GNI per Capita (USD)
                 hovertext_template = (
@@ -445,11 +445,11 @@ with tab3:
             ))
 
         yaxis_title = {
-            "HDI": "Index (0–1)",
-            "Life Expectancy (years)": "Life Expectancy",
-            "Mean Years of Schooling": "Years of Schooling",
-            "Expected Years of Schooling": "Years of Schooling",
-            "GNI per Capita (USD)": "GNI per Capita"
+            "HDI": "HDI",
+            "Life Expectancy (years)": "Life Expectancy (years)",
+            "Mean Years of Schooling": "Mean Years of Schooling",
+            "Expected Years of Schooling": "Expected Years of Schooling",
+            "GNI per Capita (USD)": "GNI per Capita (USD)"
         }[component]
 
         line_fig.update_layout(
