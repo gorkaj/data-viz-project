@@ -371,6 +371,7 @@ with tab3:
     with col2:
         years_range = list(range(1990, 2024))
         line_fig = go.Figure()
+        all_vals = []
 
         prefix_map = {
             "HDI": "hdi",
@@ -392,6 +393,7 @@ with tab3:
                 if f"{prefix}_{y}" in df.columns else None
                 for y in years_range
             ]
+            all_vals.extend([v for v in vals if v is not None])
 
             hovertexts = [country] * len(years_range)  # country name
             custom_data = [[subregion]] * len(years_range) # subregion
@@ -444,6 +446,15 @@ with tab3:
                 hovertemplate=hovertext_template,
             ))
 
+        max_y_value = max(all_vals) if all_vals else 1
+
+        if component == "HDI":
+            final_max_y = 1.0
+        elif component == "GNI per Capita (USD)":
+            final_max_y = (int(max_y_value / 10000) + 1) * 10000
+        else:
+            final_max_y = max_y_value * 1.05
+
         yaxis_title = {
             "HDI": "HDI",
             "Life Expectancy (years)": "Life Expectancy (years)",
@@ -455,6 +466,7 @@ with tab3:
         line_fig.update_layout(
             xaxis_title="Year",
             yaxis_title=yaxis_title,
+            yaxis=dict(range=[0, final_max_y]),
             width=1000,
             height=500,
             legend_title="Countries",
