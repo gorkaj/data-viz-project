@@ -50,6 +50,26 @@ st.set_page_config(
     page_icon="🌍",
     layout="wide")
 
+# --- Top bar adjustments ---
+st.markdown("""
+<style>
+    /* streamlit bar */
+    header, .stAppHeader {
+        height: 1.3rem !important;      
+        min-height: 1.3rem !important;
+        padding: 0.1rem !important;
+    }
+    .block-container {
+        padding-top: 0rem !important;
+        padding-bottom: 0rem !important;
+    }
+    /* tabs */
+    .block-container {
+        padding-top: 2rem; 
+    }
+</style>
+""", unsafe_allow_html=True)
+
 if 'selected_countries' not in st.session_state:
     st.session_state.selected_countries = []
 if 'sync_key_counter' not in st.session_state:
