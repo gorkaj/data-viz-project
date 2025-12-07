@@ -72,11 +72,17 @@ st.markdown("""
 
 if 'selected_countries' not in st.session_state:
     st.session_state.selected_countries = []
+if 'selected_year' not in st.session_state:
+    st.session_state.selected_year = 2023
 if 'sync_key_counter' not in st.session_state:
     st.session_state.sync_key_counter = 0
 
 def update_selected_countries(key):
     st.session_state.selected_countries = st.session_state[key]
+    st.session_state.sync_key_counter += 1
+
+def update_selected_year(key):
+    st.session_state.selected_year = st.session_state[key]
     st.session_state.sync_key_counter += 1
 
 # ---------------------------
@@ -132,7 +138,15 @@ with tab1:
     }
 
     with col1:
-        year_map = st.slider("Select Year", 1990, 2023, 2023, key="map_slider")
+        year_map = st.slider(
+            "Select Year",
+            1990,
+            2023,
+            value=st.session_state.selected_year,
+            key=f"map_slider_{st.session_state.sync_key_counter}",
+            on_change=update_selected_year,
+            args=(f"map_slider_{st.session_state.sync_key_counter}",)
+        )
         selection = st.selectbox(
             "Select Component",
             tuple(label_map.keys()),
@@ -238,7 +252,15 @@ with tab2:
     categories = list(global_ranges.keys())
 
     with col1:
-        year_radar = st.slider("Select Year", 1990, 2023, 2023)
+        year_radar = st.slider(
+            "Select Year",
+            1990,
+            2023,
+            value=st.session_state.selected_year,
+            key=f"radar_slider_{st.session_state.sync_key_counter}",
+            on_change=update_selected_year,
+            args=(f"radar_slider_{st.session_state.sync_key_counter}",)
+        )
         countries_radar = st.multiselect(
             "Select Countries",
             sorted(df["country"].unique()),
@@ -484,7 +506,13 @@ with tab4:
 
     with col1:
         year_scatter = st.slider(
-            "Select Year", 1990, 2023, 2023, key="scatter_slider"
+            "Select Year",
+            1990,
+            2023,
+            value=st.session_state.selected_year,
+            key=f"scatter_slider_{st.session_state.sync_key_counter}",
+            on_change=update_selected_year,
+            args=(f"scatter_slider_{st.session_state.sync_key_counter}",)
         )
 
         # X-axis
