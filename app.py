@@ -362,7 +362,10 @@ with tab3:
             "Select Countries",
             sorted(df["country"].unique()),
             max_selections=5,
-            key="temporal_countries"
+            default=st.session_state.selected_countries,
+            key=f"country_filter_temporal_{st.session_state.sync_key_counter}",
+            on_change=update_selected_countries,
+            args=(f"country_filter_temporal_{st.session_state.sync_key_counter}",)
         )
 
     with col2:
