@@ -707,7 +707,7 @@ with tab4:
             fig_scatter.update_xaxes(type="log")
         else:
             # fig_scatter.update_xaxes(type="linear")
-            fig_scatter.update_xaxes(type="linear", range=x_range)
+            fig_scatter.update_xaxes(type="linear")
 
         # Hide legend entirely when no regions selected
         if not regions:
