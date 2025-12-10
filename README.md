@@ -1,25 +1,15 @@
 # General
-- layout (G)
-- deploy: https://data-viz-hdi-component-explorer.streamlit.app/
+- sticky year filter (K)
 
-## Data (A)
-- add regions ✅
+## Data
 
-## Map view (G)
-- readable values ✅
-
-
-## Radar plot (K)
-- readable values ✅
-- color scale ✅
-- limit entries ✅
-- show if missing HDI in table ✅
-
-## Line chart (G)
-- readable values ✅
-
+## Map view (A)
 
 ## Scatter plot (A)
-- readable values ✅
-- don't display NaN HDI ✅
-- select by region ✅
+- look at some class examples
+
+## Radar plot (K)
+
+## Line chart (G)
+- try starting y-axis at 0
+
